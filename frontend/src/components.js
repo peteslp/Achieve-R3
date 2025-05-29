@@ -941,6 +941,15 @@ export const Students = ({ currentUser, onLogout }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [activeStudentTab, setActiveStudentTab] = useState('overview');
 
+  const getProgressColor = (level) => {
+    switch(level) {
+      case 'Excellent': return 'text-green-600 bg-green-100';
+      case 'Progressing': return 'text-blue-600 bg-blue-100';
+      case 'Needs Support': return 'text-orange-600 bg-orange-100';
+      default: return 'text-slate-600 bg-slate-100';
+    }
+  };
+
   React.useEffect(() => {
     if (id) {
       const student = mockStudents.find(s => s.id === parseInt(id));
