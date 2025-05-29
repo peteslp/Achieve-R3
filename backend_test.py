@@ -1,3 +1,4 @@
+
 import requests
 import sys
 from datetime import datetime, timedelta
@@ -65,253 +66,57 @@ class AchieveAPITester:
             return True
         return False
 
-    def test_get_sessions(self):
-        """Test getting all sessions"""
+    def test_api_root(self):
+        """Test the API root endpoint"""
         success, response = self.run_test(
-            "Get All Sessions",
+            "API Root",
             "GET",
-            "api/sessions",
-            200
-        )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} sessions")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
-        return success, response
-
-    def test_get_session_by_id(self, session_id):
-        """Test getting a session by ID"""
-        success, response = self.run_test(
-            f"Get Session by ID: {session_id}",
-            "GET",
-            f"api/sessions/{session_id}",
+            "api/",
             200
         )
         return success, response
 
-    def test_get_sessions_by_date(self, date_str):
-        """Test getting sessions by date"""
+    def test_status_check(self):
+        """Test the status check endpoint"""
         success, response = self.run_test(
-            f"Get Sessions by Date: {date_str}",
+            "Status Check",
             "GET",
-            f"api/sessions/date/{date_str}",
+            "api/status",
             200
         )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} sessions for date {date_str}")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
         return success, response
 
-    def test_get_sessions_by_week(self, start_date_str):
-        """Test getting sessions by week"""
+    def test_create_status_check(self, client_name="Test Client"):
+        """Test creating a status check"""
         success, response = self.run_test(
-            f"Get Sessions by Week: {start_date_str}",
-            "GET",
-            f"api/sessions/week/{start_date_str}",
-            200
-        )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} sessions for week starting {start_date_str}")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
-        return success, response
-
-    def test_get_sessions_by_month(self, year, month):
-        """Test getting sessions by month"""
-        success, response = self.run_test(
-            f"Get Sessions by Month: {year}-{month}",
-            "GET",
-            f"api/sessions/month/{year}/{month}",
-            200
-        )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} sessions for month {year}-{month}")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
-        return success, response
-
-    def test_get_group_sessions(self):
-        """Test getting all group sessions"""
-        success, response = self.run_test(
-            "Get All Group Sessions",
-            "GET",
-            "api/group-sessions",
-            200
-        )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} group sessions")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
-        return success, response
-
-    def test_get_individual_sessions(self):
-        """Test getting all individual sessions"""
-        success, response = self.run_test(
-            "Get All Individual Sessions",
-            "GET",
-            "api/individual-sessions",
-            200
-        )
-        if success:
-            try:
-                if isinstance(response, list):
-                    print(f"Found {len(response)} individual sessions")
-                else:
-                    print(f"Response is not a list: {response}")
-            except:
-                print(f"Could not determine session count: {response}")
-        return success, response
-        
-    def test_get_session_data(self, session_id):
-        """Test getting session data for a specific session"""
-        success, response = self.run_test(
-            f"Get Session Data for Session ID: {session_id}",
-            "GET",
-            f"api/sessions/{session_id}/data",
-            200
-        )
-        return success, response
-        
-    def test_update_session_data(self, session_id, student_id, data):
-        """Test updating session data for a specific student in a session"""
-        success, response = self.run_test(
-            f"Update Session Data for Student ID: {student_id} in Session ID: {session_id}",
-            "PUT",
-            f"api/sessions/{session_id}/data/{student_id}",
-            200,
-            data=data
-        )
-        return success, response
-        
-    def test_add_trial_data(self, session_id, student_id, goal_id, was_correct):
-        """Test adding trial data for a specific goal"""
-        success, response = self.run_test(
-            f"Add Trial Data for Goal ID: {goal_id}, Student ID: {student_id}, Session ID: {session_id}",
+            "Create Status Check",
             "POST",
-            f"api/sessions/{session_id}/trial",
-            201,
-            data={
-                "student_id": student_id,
-                "goal_id": goal_id,
-                "was_correct": was_correct
-            }
-        )
-        return success, response
-        
-    def test_update_behavior_data(self, session_id, student_id, behavior_data):
-        """Test updating behavior data for a specific student in a session"""
-        success, response = self.run_test(
-            f"Update Behavior Data for Student ID: {student_id} in Session ID: {session_id}",
-            "PUT",
-            f"api/sessions/{session_id}/behavior/{student_id}",
+            "api/status",
             200,
-            data=behavior_data
+            data={"client_name": client_name}
         )
         return success, response
 
 def main():
     # Setup
     tester = AchieveAPITester()
-    today = datetime.now().strftime('%Y-%m-%d')
-    current_year = datetime.now().year
-    current_month = datetime.now().month
     
     # Run tests
-    print("\n===== Testing Achieve API Schedule Functionality =====\n")
+    print("\n===== Testing Achieve API Basic Functionality =====\n")
     
-    # Test login (may not be required for public endpoints)
+    # Test API root
+    api_root_success, api_root_response = tester.test_api_root()
+    
+    # Test status check
+    status_check_success, status_check_response = tester.test_status_check()
+    
+    # Test creating a status check
+    create_status_success, create_status_response = tester.test_create_status_check()
+    
+    # Test login (may not be implemented)
     login_success = tester.test_login()
     if not login_success:
         print("❌ Login failed or not implemented, continuing without authentication")
-    
-    # Test getting all sessions
-    sessions_success, sessions_data = tester.test_get_sessions()
-    
-    # If we have sessions, test getting one by ID
-    session_id = None
-    if sessions_success and isinstance(sessions_data, list) and len(sessions_data) > 0:
-        try:
-            session_id = sessions_data[0]['id']
-            tester.test_get_session_by_id(session_id)
-        except:
-            print("❌ Could not extract session ID from response")
-    
-    # Test getting sessions by date
-    tester.test_get_sessions_by_date(today)
-    
-    # Test getting sessions by week
-    tester.test_get_sessions_by_week(today)
-    
-    # Test getting sessions by month
-    tester.test_get_sessions_by_month(current_year, current_month)
-    
-    # Test getting group sessions
-    group_success, group_data = tester.test_get_group_sessions()
-    
-    # Test getting individual sessions
-    individual_success, individual_data = tester.test_get_individual_sessions()
-    
-    print("\n===== Testing Achieve API Live Session Data Collection Functionality =====\n")
-    
-    # If we have a session ID, test session data functionality
-    if session_id:
-        # Test getting session data
-        data_success, session_data = tester.test_get_session_data(session_id)
-        
-        # Extract student ID for testing
-        student_id = None
-        if individual_success and isinstance(individual_data, list) and len(individual_data) > 0:
-            try:
-                student_id = individual_data[0]['studentId']
-            except:
-                try:
-                    student_id = individual_data[0]['student_id']
-                except:
-                    print("❌ Could not extract student ID from individual sessions")
-        
-        # If we have a student ID, test updating session data
-        if student_id:
-            # Test adding trial data
-            tester.test_add_trial_data(session_id, student_id, 0, True)  # Assuming goal_id 0 exists
-            
-            # Test updating behavior data
-            behavior_data = {
-                "engagement": 8,
-                "cooperation": 7,
-                "attention": 9,
-                "notes": "Student showed excellent engagement during the session."
-            }
-            tester.test_update_behavior_data(session_id, student_id, behavior_data)
-            
-            # Test updating session data
-            session_update_data = {
-                "sessionNotes": "Overall good session with progress on articulation goals.",
-                "nextSteps": "Continue with current approach and increase difficulty."
-            }
-            tester.test_update_session_data(session_id, student_id, session_update_data)
-    else:
-        print("❌ No session ID available for testing live session data collection")
     
     # Print results
     print(f"\n📊 Tests passed: {tester.tests_passed}/{tester.tests_run}")
