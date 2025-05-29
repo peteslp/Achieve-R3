@@ -829,9 +829,88 @@ export const Schedule = ({ currentUser, onLogout }) => {
   };
 
   const getSessionsForDate = (date) => {
-    return mockSessions.filter(session => 
+    const individualSessions = mockSessions.filter(session => 
       format(new Date(session.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
     );
+    
+    const groupSessions = mockGroupSessions.filter(session => 
+      format(new Date(session.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+    );
+    
+    return { individualSessions, groupSessions };
+  };
+
+  const handleSessionClick = (session) => {
+    if (session.type === 'Group') {
+      // Future: Navigate to live group session interface
+      console.log('Opening group session:', session.name);
+      // For now, show an alert
+      alert(`Group Session: ${session.name}\nStudents: ${session.studentIds.map(id => mockStudents.find(s => s.id === id)?.name).join(', ')}\nReady for live session data collection!`);
+    } else {
+      // Future: Navigate to individual session interface
+      console.log('Opening individual session for student:', session.studentId);
+    }
+  };
+
+  const renderSessionCard = (session, isGroupSession = false) => {
+    if (isGroupSession) {
+      const students = session.studentIds.map(id => mockStudents.find(s => s.id === id)).filter(Boolean);
+      return (
+        <div 
+          key={session.id} 
+          className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500 cursor-pointer hover:bg-purple-100 transition-colors"
+          onClick={() => handleSessionClick(session)}
+        >
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-purple-600" />
+            <span className="text-purple-600 font-medium text-sm">GROUP</span>
+          </div>
+          <div className="text-purple-600 font-medium">
+            {format(new Date(session.date), 'h:mm a')}
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-slate-900">{session.name}</p>
+            <p className="text-sm text-slate-600">{session.duration} minutes • {session.room}</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="text-xs text-slate-500">Students:</span>
+              {students.map((student, index) => (
+                <span key={student.id} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                  {student.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-medium">
+              {session.status}
+            </span>
+          </div>
+        </div>
+      );
+    } else {
+      const student = mockStudents.find(s => s.id === session.studentId);
+      return (
+        <div 
+          key={session.id} 
+          className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 cursor-pointer hover:bg-blue-100 transition-colors"
+          onClick={() => handleSessionClick(session)}
+        >
+          <div className="text-blue-600 font-medium">
+            {format(new Date(session.date), 'h:mm a')}
+          </div>
+          <img src={student?.avatar} alt={student?.name} className="w-10 h-10 rounded-full object-cover" />
+          <div className="flex-1">
+            <p className="font-medium text-slate-900">{student?.name}</p>
+            <p className="text-sm text-slate-600">{session.type} • {session.duration} minutes</p>
+          </div>
+          <div className="text-right">
+            <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
+              {session.status}
+            </span>
+          </div>
+        </div>
+      );
+    }
   };
 
   const viewDates = getViewDates();
