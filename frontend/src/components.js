@@ -32,6 +32,28 @@ const formatDateForSessions = (date) => {
 // Get current week dates for scheduling
 const currentWeekDates = getCurrentWeekDates();
 
+// Helper functions for current dates
+const getCurrentWeekDates = () => {
+  const today = new Date();
+  const currentWeek = [];
+  const startOfCurrentWeek = new Date(today);
+  startOfCurrentWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfCurrentWeek);
+    date.setDate(startOfCurrentWeek.getDate() + i);
+    currentWeek.push(date);
+  }
+  return currentWeek;
+};
+
+const formatDateForSessions = (date) => {
+  return date.toISOString();
+};
+
+// Get current week dates for scheduling
+const currentWeekDates = getCurrentWeekDates();
+
 // Helper function for progress color styling
 const getProgressColor = (level) => {
   switch(level) {
