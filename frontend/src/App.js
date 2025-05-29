@@ -30,6 +30,7 @@ function App() {
           <Route path="/schedule" element={<Schedule currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/students" element={<Students currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/students/:id" element={<Students currentUser={currentUser} onLogout={handleLogout} />} />
+          <Route path="/live-session/:sessionId" element={<LiveSession currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </BrowserRouter>
     </div>
