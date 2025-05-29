@@ -609,10 +609,11 @@ export const Dashboard = ({ currentUser, onLogout }) => {
               <Clock className="h-5 w-5 text-blue-500" />
             </div>
             
-            {todaySessions.length === 0 ? (
+            {todaySessions.length === 0 && todayGroupSessions.length === 0 ? (
               <p className="text-slate-500 text-center py-4">No sessions scheduled for today</p>
             ) : (
               <div className="space-y-3">
+                {/* Individual Sessions */}
                 {todaySessions.map(session => {
                   const student = mockStudents.find(s => s.id === session.studentId);
                   return (
@@ -628,6 +629,34 @@ export const Dashboard = ({ currentUser, onLogout }) => {
                         <p className="text-sm font-medium text-blue-600">
                           {format(new Date(session.date), 'h:mm a')}
                         </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Group Sessions */}
+                {todayGroupSessions.map(session => {
+                  const students = session.studentIds.map(id => mockStudents.find(s => s.id === id)).filter(Boolean);
+                  return (
+                    <div key={session.id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1">
+                          <Users className="h-5 w-5 text-purple-600" />
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">GROUP</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{session.name}</p>
+                          <div className="flex items-center space-x-1 text-sm text-slate-600">
+                            <span>{session.duration} min •</span>
+                            <span>{students.map(s => s.name).join(', ')}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-purple-600">
+                          {format(new Date(session.date), 'h:mm a')}
+                        </p>
+                        <p className="text-xs text-slate-500">{session.room}</p>
                       </div>
                     </div>
                   );
