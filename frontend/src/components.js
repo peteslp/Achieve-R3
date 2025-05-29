@@ -986,29 +986,21 @@ export const Schedule = ({ currentUser, onLogout }) => {
                 {format(currentDate, 'EEEE, MMMM dd')}
               </h3>
               <div className="space-y-3">
-                {getSessionsForDate(currentDate).map(session => {
-                  const student = mockStudents.find(s => s.id === session.studentId);
-                  return (
-                    <div key={session.id} className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                      <div className="text-blue-600 font-medium">
-                        {format(new Date(session.date), 'h:mm a')}
-                      </div>
-                      <img src={student?.avatar} alt={student?.name} className="w-10 h-10 rounded-full object-cover" />
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-900">{student?.name}</p>
-                        <p className="text-sm text-slate-600">{session.type} • {session.duration} minutes</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium">
-                          {session.status}
-                        </span>
-                      </div>
-                    </div>
+                {(() => {
+                  const { individualSessions, groupSessions } = getSessionsForDate(currentDate);
+                  const allSessions = [
+                    ...individualSessions.map(session => ({ ...session, isGroup: false })),
+                    ...groupSessions.map(session => ({ ...session, isGroup: true }))
+                  ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                  if (allSessions.length === 0) {
+                    return <p className="text-slate-500 text-center py-8">No sessions scheduled for this day</p>;
+                  }
+
+                  return allSessions.map(session => 
+                    renderSessionCard(session, session.isGroup)
                   );
-                })}
-                {getSessionsForDate(currentDate).length === 0 && (
-                  <p className="text-slate-500 text-center py-8">No sessions scheduled for this day</p>
-                )}
+                })()}
               </div>
             </div>
           </div>
@@ -1022,26 +1014,56 @@ export const Schedule = ({ currentUser, onLogout }) => {
               ))}
             </div>
             <div className="grid grid-cols-7">
-              {viewDates.map(date => (
-                <div key={date.toISOString()} className="min-h-[120px] p-2 border-r border-slate-200 last:border-r-0">
-                  <div className={clsx(
-                    "text-sm font-medium mb-2",
-                    isToday(date) ? "text-blue-600" : "text-slate-900"
-                  )}>
-                    {format(date, 'd')}
-                  </div>
-                  <div className="space-y-1">
-                    {getSessionsForDate(date).map(session => {
-                      const student = mockStudents.find(s => s.id === session.studentId);
-                      return (
-                        <div key={session.id} className="text-xs p-1 bg-blue-100 text-blue-700 rounded truncate">
-                          {format(new Date(session.date), 'h:mm a')} {student?.name}
+              {viewDates.map(date => {
+                const { individualSessions, groupSessions } = getSessionsForDate(date);
+                const allSessions = [
+                  ...individualSessions,
+                  ...groupSessions
+                ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                return (
+                  <div key={date.toISOString()} className="min-h-[120px] p-2 border-r border-slate-200 last:border-r-0">
+                    <div className={clsx(
+                      "text-sm font-medium mb-2",
+                      isToday(date) ? "text-blue-600" : "text-slate-900"
+                    )}>
+                      {format(date, 'd')}
+                    </div>
+                    <div className="space-y-1">
+                      {allSessions.slice(0, 3).map(session => {
+                        const isGroup = session.studentIds !== undefined;
+                        if (isGroup) {
+                          return (
+                            <div 
+                              key={session.id} 
+                              className="text-xs p-1 bg-purple-100 text-purple-700 rounded truncate cursor-pointer hover:bg-purple-200"
+                              onClick={() => handleSessionClick(session)}
+                            >
+                              {format(new Date(session.date), 'h:mm a')} {session.name}
+                            </div>
+                          );
+                        } else {
+                          const student = mockStudents.find(s => s.id === session.studentId);
+                          return (
+                            <div 
+                              key={session.id} 
+                              className="text-xs p-1 bg-blue-100 text-blue-700 rounded truncate cursor-pointer hover:bg-blue-200"
+                              onClick={() => handleSessionClick(session)}
+                            >
+                              {format(new Date(session.date), 'h:mm a')} {student?.name}
+                            </div>
+                          );
+                        }
+                      })}
+                      {allSessions.length > 3 && (
+                        <div className="text-xs text-slate-500">
+                          +{allSessions.length - 3} more
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -1054,32 +1076,53 @@ export const Schedule = ({ currentUser, onLogout }) => {
               ))}
             </div>
             <div className="grid grid-cols-7">
-              {viewDates.map(date => (
-                <div key={date.toISOString()} className={clsx(
-                  "min-h-[100px] p-2 border-r border-b border-slate-200 last:border-r-0",
-                  !isSameMonth(date, currentDate) && "bg-slate-50"
-                )}>
-                  <div className={clsx(
-                    "text-sm font-medium mb-1",
-                    isToday(date) ? "text-blue-600" : 
-                    isSameMonth(date, currentDate) ? "text-slate-900" : "text-slate-400"
+              {viewDates.map(date => {
+                const { individualSessions, groupSessions } = getSessionsForDate(date);
+                const allSessions = [
+                  ...individualSessions,
+                  ...groupSessions
+                ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                return (
+                  <div key={date.toISOString()} className={clsx(
+                    "min-h-[100px] p-2 border-r border-b border-slate-200 last:border-r-0",
+                    !isSameMonth(date, currentDate) && "bg-slate-50"
                   )}>
-                    {format(date, 'd')}
+                    <div className={clsx(
+                      "text-sm font-medium mb-1",
+                      isToday(date) ? "text-blue-600" : 
+                      isSameMonth(date, currentDate) ? "text-slate-900" : "text-slate-400"
+                    )}>
+                      {format(date, 'd')}
+                    </div>
+                    <div className="space-y-1">
+                      {allSessions.slice(0, 2).map(session => {
+                        const isGroup = session.studentIds !== undefined;
+                        return (
+                          <div 
+                            key={session.id} 
+                            className={clsx(
+                              "text-xs p-1 rounded truncate cursor-pointer",
+                              isGroup 
+                                ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
+                                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            )}
+                            onClick={() => handleSessionClick(session)}
+                          >
+                            {format(new Date(session.date), 'h:mm a')}
+                            {isGroup ? ` (Group)` : ''}
+                          </div>
+                        );
+                      })}
+                      {allSessions.length > 2 && (
+                        <div className="text-xs text-slate-500">
+                          +{allSessions.length - 2} more
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {getSessionsForDate(date).slice(0, 2).map(session => (
-                      <div key={session.id} className="text-xs p-1 bg-blue-100 text-blue-700 rounded truncate">
-                        {format(new Date(session.date), 'h:mm a')}
-                      </div>
-                    ))}
-                    {getSessionsForDate(date).length > 2 && (
-                      <div className="text-xs text-slate-500">
-                        +{getSessionsForDate(date).length - 2} more
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
