@@ -118,7 +118,7 @@ const mockSessions = [
   {
     id: 1,
     studentId: 1,
-    date: "2024-01-15T10:00:00",
+    date: "2025-01-15T10:00:00",
     duration: 30,
     type: "Individual",
     goals: ["Articulation practice", "Homework review"],
@@ -127,7 +127,7 @@ const mockSessions = [
   {
     id: 2,
     studentId: 3,
-    date: "2024-01-16T09:00:00",
+    date: "2025-01-16T09:00:00",
     duration: 30,
     type: "Individual",
     goals: ["Voice exercises", "Communication practice"],
@@ -136,7 +136,7 @@ const mockSessions = [
   {
     id: 3,
     studentId: 4,
-    date: "2024-01-16T14:00:00",
+    date: "2025-01-16T14:00:00",
     duration: 30,
     type: "Individual",
     goals: ["Phonics work", "Vocabulary building"],
@@ -145,7 +145,7 @@ const mockSessions = [
   {
     id: 4,
     studentId: 1,
-    date: "2024-01-17T09:00:00",
+    date: "2025-01-17T09:00:00",
     duration: 30,
     type: "Individual",
     goals: ["Articulation - /R/ sound practice"],
@@ -154,7 +154,7 @@ const mockSessions = [
   {
     id: 5,
     studentId: 5,
-    date: "2024-01-18T11:00:00",
+    date: "2025-01-18T11:00:00",
     duration: 30,
     type: "Individual",
     goals: ["Reading comprehension", "Language structure"],
@@ -166,7 +166,7 @@ const mockGroupSessions = [
   {
     id: 'group-1',
     name: "Social Communication Group",
-    date: "2024-01-15T13:00:00",
+    date: "2025-01-15T13:00:00",
     duration: 45,
     type: "Group",
     studentIds: [2, 5], // Marcus Johnson, Sofia Martinez
@@ -178,7 +178,7 @@ const mockGroupSessions = [
   {
     id: 'group-2',
     name: "Articulation Practice Group",
-    date: "2024-01-16T15:30:00",
+    date: "2025-01-16T15:30:00",
     duration: 60,
     type: "Group",
     studentIds: [1, 4], // Emma Rodriguez, Dylan Chen
@@ -190,7 +190,7 @@ const mockGroupSessions = [
   {
     id: 'group-3',
     name: "Language Enrichment Group",
-    date: "2024-01-17T14:00:00",
+    date: "2025-01-17T14:00:00",
     duration: 50,
     type: "Group",
     studentIds: [3, 5, 2], // Aisha Patel, Sofia Martinez, Marcus Johnson
@@ -202,7 +202,7 @@ const mockGroupSessions = [
   {
     id: 'group-4',
     name: "Fluency Support Group",
-    date: "2024-01-18T10:00:00",
+    date: "2025-01-18T10:00:00",
     duration: 45,
     type: "Group",
     studentIds: [2, 4], // Marcus Johnson, Dylan Chen
@@ -214,7 +214,7 @@ const mockGroupSessions = [
   {
     id: 'group-5',
     name: "Reading Readiness Group",
-    date: "2024-01-19T09:30:00",
+    date: "2025-01-19T09:30:00",
     duration: 40,
     type: "Group",
     studentIds: [1, 4, 3], // Emma Rodriguez, Dylan Chen, Aisha Patel
@@ -226,7 +226,7 @@ const mockGroupSessions = [
   {
     id: 'group-6',
     name: "Peer Communication Circle",
-    date: "2024-01-22T11:30:00",
+    date: "2025-01-22T11:30:00",
     duration: 45,
     type: "Group",
     studentIds: [2, 3, 5], // Marcus Johnson, Aisha Patel, Sofia Martinez
