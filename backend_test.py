@@ -249,6 +249,7 @@ def main():
     sessions_success, sessions_data = tester.test_get_sessions()
     
     # If we have sessions, test getting one by ID
+    session_id = None
     if sessions_success and isinstance(sessions_data, list) and len(sessions_data) > 0:
         try:
             session_id = sessions_data[0]['id']
@@ -266,10 +267,51 @@ def main():
     tester.test_get_sessions_by_month(current_year, current_month)
     
     # Test getting group sessions
-    tester.test_get_group_sessions()
+    group_success, group_data = tester.test_get_group_sessions()
     
     # Test getting individual sessions
-    tester.test_get_individual_sessions()
+    individual_success, individual_data = tester.test_get_individual_sessions()
+    
+    print("\n===== Testing Achieve API Live Session Data Collection Functionality =====\n")
+    
+    # If we have a session ID, test session data functionality
+    if session_id:
+        # Test getting session data
+        data_success, session_data = tester.test_get_session_data(session_id)
+        
+        # Extract student ID for testing
+        student_id = None
+        if individual_success and isinstance(individual_data, list) and len(individual_data) > 0:
+            try:
+                student_id = individual_data[0]['studentId']
+            except:
+                try:
+                    student_id = individual_data[0]['student_id']
+                except:
+                    print("❌ Could not extract student ID from individual sessions")
+        
+        # If we have a student ID, test updating session data
+        if student_id:
+            # Test adding trial data
+            tester.test_add_trial_data(session_id, student_id, 0, True)  # Assuming goal_id 0 exists
+            
+            # Test updating behavior data
+            behavior_data = {
+                "engagement": 8,
+                "cooperation": 7,
+                "attention": 9,
+                "notes": "Student showed excellent engagement during the session."
+            }
+            tester.test_update_behavior_data(session_id, student_id, behavior_data)
+            
+            # Test updating session data
+            session_update_data = {
+                "sessionNotes": "Overall good session with progress on articulation goals.",
+                "nextSteps": "Continue with current approach and increase difficulty."
+            }
+            tester.test_update_session_data(session_id, student_id, session_update_data)
+    else:
+        print("❌ No session ID available for testing live session data collection")
     
     # Print results
     print(f"\n📊 Tests passed: {tester.tests_passed}/{tester.tests_run}")
