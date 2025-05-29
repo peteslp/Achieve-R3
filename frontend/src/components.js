@@ -10,6 +10,16 @@ import {
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth } from 'date-fns';
 import clsx from 'clsx';
 
+// Helper function for progress color styling
+const getProgressColor = (level) => {
+  switch(level) {
+    case 'Excellent': return 'text-green-600 bg-green-100';
+    case 'Progressing': return 'text-blue-600 bg-blue-100';
+    case 'Needs Support': return 'text-orange-600 bg-orange-100';
+    default: return 'text-slate-600 bg-slate-100';
+  }
+};
+
 // Mock Data
 const mockStudents = [
   {
