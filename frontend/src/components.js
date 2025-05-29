@@ -783,7 +783,7 @@ export const Caseload = ({ currentUser, onLogout }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredStudents.map(student => (
             <div key={student.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer"
-                 onClick={() => navigate(`/students/${student.id}`)}>
+                 onClick={() => navigate(`/student/${student.id}`)}>
               <div className="flex items-center space-x-4 mb-4">
                 <img src={student.avatar} alt={student.name} className="w-12 h-12 rounded-full object-cover" />
                 <div className="flex-1">
