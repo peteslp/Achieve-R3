@@ -543,7 +543,7 @@ export const Dashboard = ({ currentUser, onLogout }) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 text-sm">Today's Sessions</p>
-                <p className="text-2xl font-bold text-slate-900">{todaySessions.length}</p>
+                <p className="text-2xl font-bold text-slate-900">{todaySessions.length + todayGroupSessions.length}</p>
               </div>
               <Calendar className="h-8 w-8 text-green-600" />
             </div>
