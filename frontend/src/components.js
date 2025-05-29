@@ -1640,10 +1640,14 @@ export const LiveSession = ({ currentUser, onLogout }) => {
   );
 };
 
-// Students Component (keeping it simple for now)
-export const Students = ({ currentUser, onLogout }) => {
+// StudentDetail Component - Comprehensive Student Information
+export const StudentDetail = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState('students');
+  const { id } = useParams();
+  const [currentTab, setCurrentTab] = useState('caseload');
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const student = mockStudents.find(s => s.id === parseInt(id));
 
   const handleTabChange = (tab) => {
     setCurrentTab(tab);
@@ -1651,16 +1655,101 @@ export const Students = ({ currentUser, onLogout }) => {
       case 'dashboard':
         navigate('/');
         break;
-      case 'caseload':
-        navigate('/caseload');
-        break;
       case 'schedule':
         navigate('/schedule');
         break;
       default:
-        navigate('/students');
+        navigate('/caseload');
     }
   };
+
+  if (!student) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Student Not Found</h2>
+          <button 
+            onClick={() => navigate('/caseload')}
+            className="text-blue-600 hover:text-blue-500"
+          >
+            Return to Caseload
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mock additional data for the student
+  const studentSessions = mockSessions.filter(s => s.studentId === student.id)
+    .concat(mockGroupSessions.filter(s => s.studentIds.includes(student.id)));
+
+  const assessmentHistory = [
+    {
+      id: 1,
+      name: "GFTA-3 Assessment",
+      date: "2024-12-10",
+      score: "85%",
+      status: "Complete",
+      type: "Articulation",
+      notes: "Significant improvement in /R/ sound production"
+    },
+    {
+      id: 2,
+      name: "CELF-5 Evaluation",
+      date: "2024-11-15",
+      score: "78%",
+      status: "Complete",
+      type: "Language",
+      notes: "Working level language skills, continued therapy recommended"
+    },
+    {
+      id: 3,
+      name: "Fluency Assessment",
+      date: "2024-10-20",
+      score: "72%",
+      status: "Complete",
+      type: "Fluency",
+      notes: "Mild disfluencies noted, monitoring progress"
+    }
+  ];
+
+  const progressData = [
+    { date: "2024-11-01", goal: "Articulation", accuracy: 65 },
+    { date: "2024-11-08", goal: "Articulation", accuracy: 70 },
+    { date: "2024-11-15", goal: "Articulation", accuracy: 75 },
+    { date: "2024-11-22", goal: "Articulation", accuracy: 78 },
+    { date: "2024-11-29", goal: "Articulation", accuracy: 82 }
+  ];
+
+  const strategies = [
+    "Use visual cues for sound production",
+    "Provide frequent positive reinforcement",
+    "Break tasks into smaller steps",
+    "Allow extra processing time",
+    "Use peer modeling when appropriate",
+    "Incorporate movement into activities"
+  ];
+
+  const recordedSessions = [
+    {
+      id: 1,
+      date: "2024-12-01",
+      type: "Individual",
+      duration: "30 min",
+      goals: ["Articulation practice"],
+      notes: "Great progress on /R/ sounds",
+      recording: "session_001.mp4"
+    },
+    {
+      id: 2,
+      date: "2024-11-28",
+      type: "Group",
+      duration: "45 min",
+      goals: ["Social communication"],
+      notes: "Participated well in group discussion",
+      recording: "session_002.mp4"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -1672,54 +1761,474 @@ export const Students = ({ currentUser, onLogout }) => {
       />
       
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Students</h1>
-            <p className="text-slate-600">Detailed student profiles and management</p>
+        {/* Student Header */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
+          <div className="flex items-center space-x-4 mb-6">
+            <button 
+              onClick={() => navigate('/caseload')}
+              className="p-2 hover:bg-slate-100 rounded-lg"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center space-x-4 flex-1">
+              <img src={student.avatar} alt={student.name} className="w-20 h-20 rounded-full object-cover" />
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-slate-900">{student.name}</h1>
+                <p className="text-slate-600 text-lg">{student.grade} • Age {student.age}</p>
+                <div className="flex items-center space-x-4 mt-2">
+                  <span className={clsx("px-3 py-1 rounded-full text-sm font-medium", getProgressColor(student.progressLevel))}>
+                    {student.progressLevel}
+                  </span>
+                  <span className="text-sm text-slate-600">{student.therapyType} Therapy</span>
+                  <span className="text-sm text-slate-600">{student.servicesPerWeek}x/week</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-slate-500">Overall Progress</div>
+                <div className="text-3xl font-bold text-slate-900">{student.recentProgress.score}%</div>
+                <div className="flex items-center justify-end space-x-1">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <span className="text-sm text-green-600">Improving</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex border-b border-slate-200">
+            {[
+              { id: 'overview', name: 'Overview', icon: User },
+              { id: 'goals', name: 'Goals & Progress', icon: Target },
+              { id: 'assessments', name: 'Assessments', icon: BarChart3 },
+              { id: 'sessions', name: 'Session History', icon: MessageSquare },
+              { id: 'schedule', name: 'Schedule & Times', icon: CalendarIcon },
+              { id: 'accommodations', name: 'Strategies', icon: BookOpen },
+              { id: 'notes', name: 'Notes & Documents', icon: FileText }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={clsx(
+                  "flex items-center space-x-2 px-6 py-4 font-medium transition-colors border-b-2",
+                  activeTab === tab.id
+                    ? "text-blue-600 border-blue-600"
+                    : "text-slate-600 hover:text-slate-900 border-transparent"
+                )}
+              >
+                <tab.icon className="h-4 w-4" />
+                <span>{tab.name}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockStudents.map(student => (
-            <div key={student.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-center space-x-4 mb-4">
-                <img src={student.avatar} alt={student.name} className="w-12 h-12 rounded-full object-cover" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900">{student.name}</h3>
-                  <p className="text-slate-600 text-sm">{student.grade} • Age {student.age}</p>
-                </div>
-                <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", getProgressColor(student.progressLevel))}>
-                  {student.progressLevel}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-slate-900 mb-1">Primary Goals</p>
-                  <div className="space-y-1">
-                    {student.primaryGoals.slice(0, 2).map((goal, index) => (
-                      <p key={index} className="text-sm text-slate-600">• {goal}</p>
-                    ))}
+        {/* Tab Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Student Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Status</label>
+                      <p className="text-slate-900">{student.status}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Therapy Type</label>
+                      <p className="text-slate-900">{student.therapyType}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Services per Week</label>
+                      <p className="text-slate-900">{student.servicesPerWeek}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Session Length</label>
+                      <p className="text-slate-900">{student.sessionLength}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Next Session</label>
+                      <p className="text-slate-900">{format(new Date(student.nextSession), 'MMM dd, h:mm a')}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Progress Level</label>
+                      <p className="text-slate-900">{student.progressLevel}</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-3 border-t border-slate-200">
-                  <div className="text-sm">
-                    <p className="text-slate-500">Services</p>
-                    <p className="font-medium text-slate-900">{student.servicesPerWeek}x/week</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-500">Progress</p>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-sm font-medium">{student.recentProgress.score}%</span>
-                      <TrendingUp className={clsx("h-3 w-3", 
-                        student.recentProgress.trend === 'up' ? 'text-green-500' : 'text-slate-400')} />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Important Dates</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-orange-50 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <FileText className="h-5 w-5 text-orange-600" />
+                        <span className="font-medium text-orange-900">IEP Due</span>
+                      </div>
+                      <p className="text-orange-800">
+                        {student.iepDue ? format(new Date(student.iepDue), 'MMM dd, yyyy') : 'No IEP scheduled'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">Evaluation Due</span>
+                      </div>
+                      <p className="text-blue-800">
+                        {student.evaluationDue ? format(new Date(student.evaluationDue), 'MMM dd, yyyy') : 'No evaluation scheduled'}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
+            )}
+
+            {activeTab === 'goals' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Current Goals</h3>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                      Add New Goal
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {student.primaryGoals.map((goal, index) => (
+                      <div key={index} className="p-4 border border-slate-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-slate-900">Goal {index + 1}</h4>
+                          <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                            Active
+                          </span>
+                        </div>
+                        <p className="text-slate-700 mb-3">{goal}</p>
+                        
+                        <div className="grid grid-cols-3 gap-4 mb-3">
+                          <div className="text-center p-3 bg-slate-50 rounded-lg">
+                            <div className="text-xl font-bold text-slate-900">{75 + index * 5}%</div>
+                            <div className="text-xs text-slate-500">Accuracy</div>
+                          </div>
+                          <div className="text-center p-3 bg-slate-50 rounded-lg">
+                            <div className="text-xl font-bold text-slate-900">{20 + index * 10}</div>
+                            <div className="text-xs text-slate-500">Sessions</div>
+                          </div>
+                          <div className="text-center p-3 bg-slate-50 rounded-lg">
+                            <div className="text-xl font-bold text-slate-900">{150 + index * 25}</div>
+                            <div className="text-xs text-slate-500">Trials</div>
+                          </div>
+                        </div>
+                        
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full"
+                            style={{ width: `${75 + index * 5}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Progress Monitoring</h3>
+                  <div className="space-y-3">
+                    {progressData.map((data, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-slate-900">{data.goal}</p>
+                          <p className="text-sm text-slate-600">{format(new Date(data.date), 'MMM dd, yyyy')}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-slate-900">{data.accuracy}%</p>
+                          <p className="text-sm text-slate-600">Accuracy</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'assessments' && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900">Assessment History</h3>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                    New Assessment
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {assessmentHistory.map(assessment => (
+                    <div key={assessment.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <BarChart3 className="h-8 w-8 text-blue-600" />
+                        <div>
+                          <h4 className="font-medium text-slate-900">{assessment.name}</h4>
+                          <p className="text-sm text-slate-600">{assessment.type} • {assessment.date}</p>
+                          <p className="text-sm text-slate-700 mt-1">{assessment.notes}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-slate-900">{assessment.score}</p>
+                        <p className="text-sm text-green-600">{assessment.status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'sessions' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Sessions</h3>
+                  
+                  <div className="space-y-4">
+                    {recordedSessions.map(session => (
+                      <div key={session.id} className="p-4 border border-slate-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium text-slate-900">{session.type} Session</h4>
+                            <p className="text-sm text-slate-600">{session.date} • {session.duration}</p>
+                          </div>
+                          <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                            View Recording
+                          </button>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <p className="text-sm font-medium text-slate-900 mb-1">Goals Addressed:</p>
+                          <p className="text-sm text-slate-600">{session.goals.join(', ')}</p>
+                        </div>
+                        
+                        <p className="text-sm text-slate-700">{session.notes}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'schedule' && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Therapy Schedule</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-3">Weekly Schedule</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { day: "Monday", time: "10:00 AM", type: "Individual", duration: "30 min" },
+                        { day: "Wednesday", time: "10:00 AM", type: "Individual", duration: "30 min" },
+                        { day: "Friday", time: "11:30 AM", type: "Group", duration: "45 min" }
+                      ].map((schedule, index) => (
+                        <div key={index} className="p-4 bg-blue-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-slate-900">{schedule.day}</p>
+                              <p className="text-sm text-slate-600">{schedule.type} Session</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-blue-600">{schedule.time}</p>
+                              <p className="text-sm text-slate-600">{schedule.duration}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-3">Upcoming Sessions</h4>
+                    <div className="space-y-3">
+                      {studentSessions.slice(0, 5).map(session => (
+                        <div key={session.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-slate-900">
+                              {format(new Date(session.date), 'MMM dd')}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              {session.name || `${session.type} Session`}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-green-600">
+                              {format(new Date(session.date), 'h:mm a')}
+                            </p>
+                            <p className="text-sm text-slate-600">{session.duration} min</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'accommodations' && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900">Strategies & Accommodations</h3>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                    Add Strategy
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-3">Current Accommodations</h4>
+                    <div className="space-y-2">
+                      {student.accommodations.map((accommodation, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <span className="text-slate-900">{accommodation}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-3">Recommended Strategies</h4>
+                    <div className="space-y-2">
+                      {strategies.map((strategy, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                          <Target className="h-5 w-5 text-blue-600" />
+                          <span className="text-slate-900">{strategy}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'notes' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Clinical Notes</h3>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                      Add Note
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {[
+                      {
+                        date: "2024-12-01",
+                        type: "Session Note",
+                        content: "Student demonstrated excellent progress in /R/ sound production. Achieved 85% accuracy in structured activities.",
+                        author: "Dr. Sarah Johnson"
+                      },
+                      {
+                        date: "2024-11-28",
+                        type: "Parent Conference",
+                        content: "Met with parents to discuss home practice strategies. Parents report student is practicing daily.",
+                        author: "Dr. Sarah Johnson"
+                      },
+                      {
+                        date: "2024-11-15",
+                        type: "IEP Meeting",
+                        content: "Annual IEP review completed. Goals updated to reflect current performance level.",
+                        author: "IEP Team"
+                      }
+                    ].map((note, index) => (
+                      <div key={index} className="p-4 border border-slate-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-blue-600">{note.type}</span>
+                          <span className="text-sm text-slate-500">{note.date}</span>
+                        </div>
+                        <p className="text-slate-700 mb-2">{note.content}</p>
+                        <p className="text-sm text-slate-500">By: {note.author}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Documents</h3>
+                  
+                  <div className="space-y-3">
+                    {[
+                      { name: "Current IEP", date: "2024-11-15", type: "PDF" },
+                      { name: "Speech Evaluation Report", date: "2024-10-01", type: "PDF" },
+                      { name: "Progress Report", date: "2024-12-01", type: "PDF" },
+                      { name: "Parent Consent Forms", date: "2024-09-15", type: "PDF" }
+                    ].map((doc, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="h-5 w-5 text-slate-600" />
+                          <div>
+                            <p className="font-medium text-slate-900">{doc.name}</p>
+                            <p className="text-sm text-slate-600">{doc.date} • {doc.type}</p>
+                          </div>
+                        </div>
+                        <button className="text-blue-600 hover:text-blue-500 text-sm">
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Schedule Session</span>
+                </button>
+                <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Add Note</span>
+                </button>
+                <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Run Assessment</span>
+                </button>
+              </div>
             </div>
-          ))}
+
+            <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6">
+              <div className="flex items-center space-x-2 mb-3">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-purple-900">AI Insights</h3>
+              </div>
+              <div className="space-y-2 text-sm text-purple-800">
+                <p>• Student shows consistent improvement across all goals</p>
+                <p>• Recommend increasing session frequency during IEP transition</p>
+                <p>• Consider peer interaction opportunities for social skills</p>
+                <p>• Parent engagement is high - continue home practice</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
+              <div className="space-y-3">
+                {[
+                  { action: "Session completed", time: "2 hours ago", icon: CheckCircle, color: "text-green-600" },
+                  { action: "Goal updated", time: "1 day ago", icon: Target, color: "text-blue-600" },
+                  { action: "Note added", time: "2 days ago", icon: MessageSquare, color: "text-purple-600" },
+                  { action: "Assessment scheduled", time: "3 days ago", icon: BarChart3, color: "text-orange-600" }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <activity.icon className={clsx("h-4 w-4", activity.color)} />
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-900">{activity.action}</p>
+                      <p className="text-xs text-slate-500">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
