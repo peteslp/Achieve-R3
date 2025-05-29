@@ -10,100 +10,7 @@ import {
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth } from 'date-fns';
 import clsx from 'clsx';
 
-// Mock Data
-const mockStudents = [
-  {
-    id: 1,
-    name: "Emma Rodriguez",
-    age: 8,
-    grade: "3rd Grade",
-    avatar: "https://images.pexels.com/photos/6147369/pexels-photo-6147369.jpeg",
-    status: "Active",
-    primaryGoals: ["Articulation - /R/ sound production", "Language comprehension"],
-    nextSession: formatDateForSessions(new Date(currentWeekDates[1].setHours(10, 0, 0))),
-    iepDue: "2025-02-15",
-    evaluationDue: null,
-    progressLevel: "Progressing",
-    therapyType: "Individual",
-    servicesPerWeek: 3,
-    sessionLength: "30 min",
-    accommodations: ["Extended time", "Visual supports", "Preferential seating"],
-    recentProgress: { score: 78, trend: "up" }
-  },
-  {
-    id: 2,
-    name: "Marcus Johnson",
-    age: 6,
-    grade: "1st Grade",
-    avatar: "https://images.pexels.com/photos/5212695/pexels-photo-5212695.jpeg",
-    status: "Active",
-    primaryGoals: ["Fluency improvement", "Social communication"],
-    nextSession: formatDateForSessions(new Date(currentWeekDates[5].setHours(10, 30, 0))),
-    iepDue: null,
-    evaluationDue: "2025-01-20",
-    progressLevel: "Excellent",
-    therapyType: "Group",
-    servicesPerWeek: 2,
-    sessionLength: "45 min",
-    accommodations: ["Calm down breaks", "Peer support"],
-    recentProgress: { score: 92, trend: "up" }
-  },
-  {
-    id: 3,
-    name: "Aisha Patel",
-    age: 10,
-    grade: "5th Grade",
-    avatar: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846",
-    status: "Active",
-    primaryGoals: ["Voice quality", "Pragmatic language skills"],
-    nextSession: formatDateForSessions(new Date(currentWeekDates[2].setHours(9, 0, 0))),
-    iepDue: "2025-01-25",
-    evaluationDue: null,
-    progressLevel: "Needs Support",
-    therapyType: "Individual",
-    servicesPerWeek: 4,
-    sessionLength: "30 min",
-    accommodations: ["Assistive technology", "Communication board"],
-    recentProgress: { score: 65, trend: "stable" }
-  },
-  {
-    id: 4,
-    name: "Dylan Chen",
-    age: 7,
-    grade: "2nd Grade",
-    avatar: "https://images.pexels.com/photos/8298453/pexels-photo-8298453.jpeg",
-    status: "Active",
-    primaryGoals: ["Phonological awareness", "Vocabulary expansion"],
-    nextSession: formatDateForSessions(new Date(currentWeekDates[2].setHours(14, 0, 0))),
-    iepDue: null,
-    evaluationDue: "2025-02-01",
-    progressLevel: "Progressing",
-    therapyType: "Individual",
-    servicesPerWeek: 2,
-    sessionLength: "30 min",
-    accommodations: ["Visual schedule", "Reduced auditory distractions"],
-    recentProgress: { score: 74, trend: "up" }
-  },
-  {
-    id: 5,
-    name: "Sofia Martinez",
-    age: 9,
-    grade: "4th Grade",
-    avatar: "https://images.pexels.com/photos/7402835/pexels-photo-7402835.jpeg",
-    status: "Active",
-    primaryGoals: ["Language structure", "Reading comprehension"],
-    nextSession: formatDateForSessions(new Date(currentWeekDates[4].setHours(11, 0, 0))),
-    iepDue: "2025-03-10",
-    evaluationDue: null,
-    progressLevel: "Excellent",
-    therapyType: "Group",
-    servicesPerWeek: 3,
-    sessionLength: "45 min",
-    accommodations: ["Text-to-speech", "Modified assignments"],
-    recentProgress: { score: 88, trend: "up" }
-  }
-];
-
+// Helper functions for dates and colors
 const getCurrentWeekDates = () => {
   const today = new Date();
   const currentWeek = [];
@@ -122,14 +29,117 @@ const formatDateForSessions = (date) => {
   return date.toISOString();
 };
 
+const getProgressColor = (level) => {
+  switch(level) {
+    case 'Excellent': return 'text-green-600 bg-green-100';
+    case 'Progressing': return 'text-blue-600 bg-blue-100';
+    case 'Needs Support': return 'text-orange-600 bg-orange-100';
+    default: return 'text-slate-600 bg-slate-100';
+  }
+};
+
 // Get current week dates for scheduling
 const currentWeekDates = getCurrentWeekDates();
+
+// Mock Data with current week dates
+const mockStudents = [
+  {
+    id: 1,
+    name: "Emma Rodriguez",
+    age: 8,
+    grade: "3rd Grade",
+    avatar: "https://images.pexels.com/photos/6147369/pexels-photo-6147369.jpeg",
+    status: "Active",
+    primaryGoals: ["Articulation - /R/ sound production", "Language comprehension"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(10, 0, 0)),
+    iepDue: "2025-02-15",
+    evaluationDue: null,
+    progressLevel: "Progressing",
+    therapyType: "Individual",
+    servicesPerWeek: 3,
+    sessionLength: "30 min",
+    accommodations: ["Extended time", "Visual supports", "Preferential seating"],
+    recentProgress: { score: 78, trend: "up" }
+  },
+  {
+    id: 2,
+    name: "Marcus Johnson",
+    age: 6,
+    grade: "1st Grade",
+    avatar: "https://images.pexels.com/photos/5212695/pexels-photo-5212695.jpeg",
+    status: "Active",
+    primaryGoals: ["Fluency improvement", "Social communication"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(10, 30, 0)),
+    iepDue: null,
+    evaluationDue: "2025-01-20",
+    progressLevel: "Excellent",
+    therapyType: "Group",
+    servicesPerWeek: 2,
+    sessionLength: "45 min",
+    accommodations: ["Calm down breaks", "Peer support"],
+    recentProgress: { score: 92, trend: "up" }
+  },
+  {
+    id: 3,
+    name: "Aisha Patel",
+    age: 10,
+    grade: "5th Grade",
+    avatar: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846",
+    status: "Active",
+    primaryGoals: ["Voice quality", "Pragmatic language skills"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(9, 0, 0)),
+    iepDue: "2025-01-25",
+    evaluationDue: null,
+    progressLevel: "Needs Support",
+    therapyType: "Individual",
+    servicesPerWeek: 4,
+    sessionLength: "30 min",
+    accommodations: ["Assistive technology", "Communication board"],
+    recentProgress: { score: 65, trend: "stable" }
+  },
+  {
+    id: 4,
+    name: "Dylan Chen",
+    age: 7,
+    grade: "2nd Grade",
+    avatar: "https://images.pexels.com/photos/8298453/pexels-photo-8298453.jpeg",
+    status: "Active",
+    primaryGoals: ["Phonological awareness", "Vocabulary expansion"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(14, 0, 0)),
+    iepDue: null,
+    evaluationDue: "2025-02-01",
+    progressLevel: "Progressing",
+    therapyType: "Individual",
+    servicesPerWeek: 2,
+    sessionLength: "30 min",
+    accommodations: ["Visual schedule", "Reduced auditory distractions"],
+    recentProgress: { score: 74, trend: "up" }
+  },
+  {
+    id: 5,
+    name: "Sofia Martinez",
+    age: 9,
+    grade: "4th Grade",
+    avatar: "https://images.pexels.com/photos/7402835/pexels-photo-7402835.jpeg",
+    status: "Active",
+    primaryGoals: ["Language structure", "Reading comprehension"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(11, 0, 0)),
+    iepDue: "2025-03-10",
+    evaluationDue: null,
+    progressLevel: "Excellent",
+    therapyType: "Group",
+    servicesPerWeek: 3,
+    sessionLength: "45 min",
+    accommodations: ["Text-to-speech", "Modified assignments"],
+    recentProgress: { score: 88, trend: "up" }
+  }
+];
 
 const mockSessions = [
   {
     id: 1,
     studentId: 1,
-    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(10, 0, 0))), // Monday 10:00 AM
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(10, 0, 0)), // Monday 10:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Articulation practice", "Homework review"],
@@ -138,7 +148,7 @@ const mockSessions = [
   {
     id: 2,
     studentId: 3,
-    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(9, 0, 0))), // Tuesday 9:00 AM
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(9, 0, 0)), // Tuesday 9:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Voice exercises", "Communication practice"],
@@ -147,7 +157,7 @@ const mockSessions = [
   {
     id: 3,
     studentId: 4,
-    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(14, 0, 0))), // Tuesday 2:00 PM
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(14, 0, 0)), // Tuesday 2:00 PM
     duration: 30,
     type: "Individual",
     goals: ["Phonics work", "Vocabulary building"],
@@ -156,7 +166,7 @@ const mockSessions = [
   {
     id: 4,
     studentId: 1,
-    date: formatDateForSessions(new Date(currentWeekDates[3].setHours(9, 0, 0))), // Wednesday 9:00 AM
+    date: formatDateForSessions(new Date(currentWeekDates[3].getTime()).setHours(9, 0, 0)), // Wednesday 9:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Articulation - /R/ sound practice"],
@@ -165,7 +175,7 @@ const mockSessions = [
   {
     id: 5,
     studentId: 5,
-    date: formatDateForSessions(new Date(currentWeekDates[4].setHours(11, 0, 0))), // Thursday 11:00 AM
+    date: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(11, 0, 0)), // Thursday 11:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Reading comprehension", "Language structure"],
@@ -174,7 +184,7 @@ const mockSessions = [
   {
     id: 6,
     studentId: 2,
-    date: formatDateForSessions(new Date(currentWeekDates[5].setHours(10, 30, 0))), // Friday 10:30 AM
+    date: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(10, 30, 0)), // Friday 10:30 AM
     duration: 30,
     type: "Individual",
     goals: ["Fluency techniques", "Confidence building"],
@@ -186,7 +196,7 @@ const mockGroupSessions = [
   {
     id: 'group-1',
     name: "Social Communication Group",
-    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(13, 0, 0))), // Monday 1:00 PM
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(13, 0, 0)), // Monday 1:00 PM
     duration: 45,
     type: "Group",
     studentIds: [2, 5], // Marcus Johnson, Sofia Martinez
@@ -198,7 +208,7 @@ const mockGroupSessions = [
   {
     id: 'group-2',
     name: "Articulation Practice Group",
-    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(15, 30, 0))), // Tuesday 3:30 PM
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(15, 30, 0)), // Tuesday 3:30 PM
     duration: 60,
     type: "Group",
     studentIds: [1, 4], // Emma Rodriguez, Dylan Chen
@@ -210,7 +220,7 @@ const mockGroupSessions = [
   {
     id: 'group-3',
     name: "Language Enrichment Group",
-    date: formatDateForSessions(new Date(currentWeekDates[3].setHours(14, 0, 0))), // Wednesday 2:00 PM
+    date: formatDateForSessions(new Date(currentWeekDates[3].getTime()).setHours(14, 0, 0)), // Wednesday 2:00 PM
     duration: 50,
     type: "Group",
     studentIds: [3, 5, 2], // Aisha Patel, Sofia Martinez, Marcus Johnson
@@ -222,7 +232,7 @@ const mockGroupSessions = [
   {
     id: 'group-4',
     name: "Fluency Support Group",
-    date: formatDateForSessions(new Date(currentWeekDates[4].setHours(10, 0, 0))), // Thursday 10:00 AM
+    date: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(10, 0, 0)), // Thursday 10:00 AM
     duration: 45,
     type: "Group",
     studentIds: [2, 4], // Marcus Johnson, Dylan Chen
@@ -234,7 +244,7 @@ const mockGroupSessions = [
   {
     id: 'group-5',
     name: "Reading Readiness Group",
-    date: formatDateForSessions(new Date(currentWeekDates[5].setHours(9, 30, 0))), // Friday 9:30 AM
+    date: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(9, 30, 0)), // Friday 9:30 AM
     duration: 40,
     type: "Group",
     studentIds: [1, 4, 3], // Emma Rodriguez, Dylan Chen, Aisha Patel
@@ -246,7 +256,7 @@ const mockGroupSessions = [
   {
     id: 'group-6',
     name: "Peer Communication Circle",
-    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(11, 30, 0))), // Monday 11:30 AM
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(11, 30, 0)), // Monday 11:30 AM
     duration: 45,
     type: "Group",
     studentIds: [2, 3, 5], // Marcus Johnson, Aisha Patel, Sofia Martinez
@@ -1184,20 +1194,10 @@ export const Schedule = ({ currentUser, onLogout }) => {
   );
 };
 
-// Students Component
+// Students Component (keeping it simple for now)
 export const Students = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
   const [currentTab, setCurrentTab] = useState('students');
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [activeStudentTab, setActiveStudentTab] = useState('overview');
-
-  React.useEffect(() => {
-    if (id) {
-      const student = mockStudents.find(s => s.id === parseInt(id));
-      setSelectedStudent(student);
-    }
-  }, [id]);
 
   const handleTabChange = (tab) => {
     setCurrentTab(tab);
@@ -1216,343 +1216,6 @@ export const Students = ({ currentUser, onLogout }) => {
     }
   };
 
-  const handleStudentSelect = (student) => {
-    setSelectedStudent(student);
-    navigate(`/students/${student.id}`);
-  };
-
-  const handleBackToList = () => {
-    setSelectedStudent(null);
-    navigate('/students');
-  };
-
-  if (selectedStudent) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Navigation 
-          currentTab={currentTab} 
-          onTabChange={handleTabChange} 
-          onLogout={onLogout}
-          currentUser={currentUser}
-        />
-        
-        <div className="p-6">
-          <div className="flex items-center space-x-4 mb-6">
-            <button 
-              onClick={handleBackToList}
-              className="p-2 hover:bg-slate-200 rounded-lg"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <div className="flex items-center space-x-4">
-              <img src={selectedStudent.avatar} alt={selectedStudent.name} className="w-16 h-16 rounded-full object-cover" />
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">{selectedStudent.name}</h1>
-                <p className="text-slate-600">{selectedStudent.grade} • Age {selectedStudent.age}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Student Navigation Tabs */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
-            <div className="flex border-b border-slate-200">
-              {[
-                { id: 'overview', name: 'Overview', icon: User },
-                { id: 'goals', name: 'Goals & Progress', icon: Target },
-                { id: 'assessments', name: 'Assessments', icon: BarChart3 },
-                { id: 'sessions', name: 'Session Notes', icon: MessageSquare },
-                { id: 'schedule', name: 'Schedule', icon: CalendarIcon }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveStudentTab(tab.id)}
-                  className={clsx(
-                    "flex items-center space-x-2 px-6 py-4 font-medium transition-colors",
-                    activeStudentTab === tab.id
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-slate-600 hover:text-slate-900"
-                  )}
-                >
-                  <tab.icon className="h-4 w-4" />
-                  <span>{tab.name}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="p-6">
-              {activeStudentTab === 'overview' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4">Student Information</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Status:</span>
-                          <span className="font-medium text-green-600">{selectedStudent.status}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Therapy Type:</span>
-                          <span className="font-medium">{selectedStudent.therapyType}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Services per Week:</span>
-                          <span className="font-medium">{selectedStudent.servicesPerWeek}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Session Length:</span>
-                          <span className="font-medium">{selectedStudent.sessionLength}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Progress Level:</span>
-                          <span className={clsx("font-medium", getProgressColor(selectedStudent.progressLevel))}>
-                            {selectedStudent.progressLevel}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4">Accommodations</h3>
-                      <div className="space-y-2">
-                        {selectedStudent.accommodations.map((accommodation, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span className="text-slate-700">{accommodation}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4">Primary Goals</h3>
-                      <div className="space-y-3">
-                        {selectedStudent.primaryGoals.map((goal, index) => (
-                          <div key={index} className="p-3 bg-blue-50 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Target className="h-4 w-4 text-blue-600" />
-                              <span className="font-medium text-slate-900">Goal {index + 1}</span>
-                            </div>
-                            <p className="text-slate-700">{goal}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4">AI Insights</h3>
-                      <div className="p-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Brain className="h-4 w-4 text-purple-600" />
-                          <span className="font-medium text-purple-900">Smart Recommendations</span>
-                        </div>
-                        <p className="text-purple-800 text-sm">
-                          Based on recent progress, consider introducing peer interaction activities 
-                          to enhance social communication skills. Morning sessions show 15% better 
-                          engagement for this student.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeStudentTab === 'goals' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-slate-900">Goals & Progress Tracking</h3>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                      Add New Goal
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {selectedStudent.primaryGoals.map((goal, index) => (
-                      <div key={index} className="bg-slate-50 rounded-lg p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-medium text-slate-900">Goal {index + 1}</h4>
-                          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                            Active
-                          </span>
-                        </div>
-                        <p className="text-slate-700 mb-4">{goal}</p>
-                        
-                        <div className="space-y-3">
-                          <div>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Progress</span>
-                              <span>{65 + index * 10}%</span>
-                            </div>
-                            <div className="w-full bg-slate-200 rounded-full h-2">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full transition-all"
-                                style={{ width: `${65 + index * 10}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          
-                          <div className="text-sm text-slate-600">
-                            <p>Target Date: March 15, 2024</p>
-                            <p>Last Updated: 2 days ago</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeStudentTab === 'assessments' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-slate-900">Assessment History</h3>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                      New Assessment
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {[
-                      { name: "GFTA-3 Assessment", date: "2024-01-10", score: "85%", status: "Complete" },
-                      { name: "CELF-5 Evaluation", date: "2023-12-15", score: "78%", status: "Complete" },
-                      { name: "Articulation Screener", date: "2023-11-20", score: "72%", status: "Complete" }
-                    ].map((assessment, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <BarChart3 className="h-8 w-8 text-blue-600" />
-                          <div>
-                            <h4 className="font-medium text-slate-900">{assessment.name}</h4>
-                            <p className="text-sm text-slate-600">{assessment.date}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-slate-900">{assessment.score}</p>
-                          <p className="text-sm text-green-600">{assessment.status}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeStudentTab === 'sessions' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-slate-900">Session Notes</h3>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                      Add Note
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {[
-                      { 
-                        date: "2024-01-12", 
-                        time: "10:00 AM",
-                        duration: "30 min",
-                        focus: "Articulation - /R/ sound",
-                        notes: "Student showed great improvement with /R/ in isolation. Practiced with picture cards and achieved 80% accuracy.",
-                        aiSuggestion: "Consider introducing /R/ in syllable level activities next session."
-                      },
-                      { 
-                        date: "2024-01-10", 
-                        time: "10:00 AM",
-                        duration: "30 min",
-                        focus: "Language comprehension",
-                        notes: "Worked on following 2-step directions. Student needed visual supports but completed 7/10 tasks correctly.",
-                        aiSuggestion: "Continue with visual supports and gradually increase complexity."
-                      }
-                    ].map((session, index) => (
-                      <div key={index} className="bg-white border border-slate-200 rounded-lg p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h4 className="font-medium text-slate-900">{session.focus}</h4>
-                            <p className="text-sm text-slate-600">{session.date} • {session.time} • {session.duration}</p>
-                          </div>
-                          <button className="text-slate-400 hover:text-slate-600">
-                            <Settings className="h-4 w-4" />
-                          </button>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="text-sm font-medium text-slate-900 mb-2">Session Notes</h5>
-                            <p className="text-slate-700">{session.notes}</p>
-                          </div>
-                          
-                          <div className="p-3 bg-purple-50 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Brain className="h-4 w-4 text-purple-600" />
-                              <span className="text-sm font-medium text-purple-900">AI Suggestion</span>
-                            </div>
-                            <p className="text-sm text-purple-800">{session.aiSuggestion}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeStudentTab === 'schedule' && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Therapy Schedule</h3>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-medium text-slate-900 mb-4">Weekly Schedule</h4>
-                      <div className="space-y-3">
-                        {[
-                          { day: "Monday", time: "10:00 AM", type: "Individual", duration: "30 min" },
-                          { day: "Wednesday", time: "10:00 AM", type: "Individual", duration: "30 min" },
-                          { day: "Friday", time: "11:30 AM", type: "Group", duration: "45 min" }
-                        ].map((schedule, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                            <div>
-                              <p className="font-medium text-slate-900">{schedule.day}</p>
-                              <p className="text-sm text-slate-600">{schedule.type} Session</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-blue-600">{schedule.time}</p>
-                              <p className="text-sm text-slate-600">{schedule.duration}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-slate-900 mb-4">Upcoming Sessions</h4>
-                      <div className="space-y-3">
-                        {mockSessions.filter(s => s.studentId === selectedStudent.id).map(session => (
-                          <div key={session.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                            <div>
-                              <p className="font-medium text-slate-900">
-                                {format(new Date(session.date), 'MMM dd')}
-                              </p>
-                              <p className="text-sm text-slate-600">{session.type} Session</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-green-600">
-                                {format(new Date(session.date), 'h:mm a')}
-                              </p>
-                              <p className="text-sm text-slate-600">{session.duration} min</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation 
@@ -1566,15 +1229,13 @@ export const Students = ({ currentUser, onLogout }) => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Students</h1>
-            <p className="text-slate-600">Select a student to view detailed information</p>
+            <p className="text-slate-600">Detailed student profiles and management</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mockStudents.map(student => (
-            <div key={student.id} 
-                 className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer"
-                 onClick={() => handleStudentSelect(student)}>
+            <div key={student.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer">
               <div className="flex items-center space-x-4 mb-4">
                 <img src={student.avatar} alt={student.name} className="w-12 h-12 rounded-full object-cover" />
                 <div className="flex-1">
