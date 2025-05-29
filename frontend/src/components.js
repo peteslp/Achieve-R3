@@ -114,11 +114,32 @@ const mockStudents = [
   }
 ];
 
+const getCurrentWeekDates = () => {
+  const today = new Date();
+  const currentWeek = [];
+  const startOfCurrentWeek = new Date(today);
+  startOfCurrentWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfCurrentWeek);
+    date.setDate(startOfCurrentWeek.getDate() + i);
+    currentWeek.push(date);
+  }
+  return currentWeek;
+};
+
+const formatDateForSessions = (date) => {
+  return date.toISOString();
+};
+
+// Get current week dates for scheduling
+const currentWeekDates = getCurrentWeekDates();
+
 const mockSessions = [
   {
     id: 1,
     studentId: 1,
-    date: "2025-01-15T10:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(10, 0, 0))), // Monday 10:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Articulation practice", "Homework review"],
@@ -127,7 +148,7 @@ const mockSessions = [
   {
     id: 2,
     studentId: 3,
-    date: "2025-01-16T09:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(9, 0, 0))), // Tuesday 9:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Voice exercises", "Communication practice"],
@@ -136,7 +157,7 @@ const mockSessions = [
   {
     id: 3,
     studentId: 4,
-    date: "2025-01-16T14:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(14, 0, 0))), // Tuesday 2:00 PM
     duration: 30,
     type: "Individual",
     goals: ["Phonics work", "Vocabulary building"],
@@ -145,7 +166,7 @@ const mockSessions = [
   {
     id: 4,
     studentId: 1,
-    date: "2025-01-17T09:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[3].setHours(9, 0, 0))), // Wednesday 9:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Articulation - /R/ sound practice"],
@@ -154,10 +175,19 @@ const mockSessions = [
   {
     id: 5,
     studentId: 5,
-    date: "2025-01-18T11:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[4].setHours(11, 0, 0))), // Thursday 11:00 AM
     duration: 30,
     type: "Individual",
     goals: ["Reading comprehension", "Language structure"],
+    status: "Scheduled"
+  },
+  {
+    id: 6,
+    studentId: 2,
+    date: formatDateForSessions(new Date(currentWeekDates[5].setHours(10, 30, 0))), // Friday 10:30 AM
+    duration: 30,
+    type: "Individual",
+    goals: ["Fluency techniques", "Confidence building"],
     status: "Scheduled"
   }
 ];
@@ -166,7 +196,7 @@ const mockGroupSessions = [
   {
     id: 'group-1',
     name: "Social Communication Group",
-    date: "2025-01-15T13:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(13, 0, 0))), // Monday 1:00 PM
     duration: 45,
     type: "Group",
     studentIds: [2, 5], // Marcus Johnson, Sofia Martinez
@@ -178,7 +208,7 @@ const mockGroupSessions = [
   {
     id: 'group-2',
     name: "Articulation Practice Group",
-    date: "2025-01-16T15:30:00",
+    date: formatDateForSessions(new Date(currentWeekDates[2].setHours(15, 30, 0))), // Tuesday 3:30 PM
     duration: 60,
     type: "Group",
     studentIds: [1, 4], // Emma Rodriguez, Dylan Chen
@@ -190,7 +220,7 @@ const mockGroupSessions = [
   {
     id: 'group-3',
     name: "Language Enrichment Group",
-    date: "2025-01-17T14:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[3].setHours(14, 0, 0))), // Wednesday 2:00 PM
     duration: 50,
     type: "Group",
     studentIds: [3, 5, 2], // Aisha Patel, Sofia Martinez, Marcus Johnson
@@ -202,7 +232,7 @@ const mockGroupSessions = [
   {
     id: 'group-4',
     name: "Fluency Support Group",
-    date: "2025-01-18T10:00:00",
+    date: formatDateForSessions(new Date(currentWeekDates[4].setHours(10, 0, 0))), // Thursday 10:00 AM
     duration: 45,
     type: "Group",
     studentIds: [2, 4], // Marcus Johnson, Dylan Chen
@@ -214,7 +244,7 @@ const mockGroupSessions = [
   {
     id: 'group-5',
     name: "Reading Readiness Group",
-    date: "2025-01-19T09:30:00",
+    date: formatDateForSessions(new Date(currentWeekDates[5].setHours(9, 30, 0))), // Friday 9:30 AM
     duration: 40,
     type: "Group",
     studentIds: [1, 4, 3], // Emma Rodriguez, Dylan Chen, Aisha Patel
@@ -226,7 +256,7 @@ const mockGroupSessions = [
   {
     id: 'group-6',
     name: "Peer Communication Circle",
-    date: "2025-01-22T11:30:00",
+    date: formatDateForSessions(new Date(currentWeekDates[1].setHours(11, 30, 0))), // Monday 11:30 AM
     duration: 45,
     type: "Group",
     studentIds: [2, 3, 5], // Marcus Johnson, Aisha Patel, Sofia Martinez
