@@ -905,14 +905,14 @@ export const Schedule = ({ currentUser, onLogout }) => {
   };
 
   const handleSessionClick = (session) => {
-    if (session.type === 'Group') {
-      // Future: Navigate to live group session interface
+    if (session.type === 'Group' || session.studentIds) {
+      // Navigate to live group session interface
       console.log('Opening group session:', session.name);
-      // For now, show an alert
-      alert(`Group Session: ${session.name}\nStudents: ${session.studentIds.map(id => mockStudents.find(s => s.id === id)?.name).join(', ')}\nReady for live session data collection!`);
+      navigate(`/live-session/${session.id}`);
     } else {
-      // Future: Navigate to individual session interface
+      // Navigate to individual session interface
       console.log('Opening individual session for student:', session.studentId);
+      navigate(`/live-session/${session.id}`);
     }
   };
 
