@@ -273,8 +273,7 @@ const Navigation = ({ currentTab, onTabChange, onLogout, currentUser }) => {
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/' },
     { id: 'caseload', name: 'Caseload', icon: Users, path: '/caseload' },
-    { id: 'schedule', name: 'Schedule', icon: Calendar, path: '/schedule' },
-    { id: 'students', name: 'Students', icon: GraduationCap, path: '/students' }
+    { id: 'schedule', name: 'Schedule', icon: Calendar, path: '/schedule' }
   ];
 
   return (
