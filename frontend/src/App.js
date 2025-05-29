@@ -28,8 +28,7 @@ function App() {
           <Route path="/" element={<Dashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/caseload" element={<Caseload currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/schedule" element={<Schedule currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/students" element={<Students currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/students/:id" element={<Students currentUser={currentUser} onLogout={handleLogout} />} />
+          <Route path="/student/:id" element={<StudentDetail currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/live-session/:sessionId" element={<LiveSession currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </BrowserRouter>
