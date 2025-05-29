@@ -126,15 +126,6 @@ const mockSessions = [
   },
   {
     id: 2,
-    studentId: 2,
-    date: "2024-01-15T11:00:00",
-    duration: 45,
-    type: "Group",
-    goals: ["Fluency techniques", "Social skills"],
-    status: "Scheduled"
-  },
-  {
-    id: 3,
     studentId: 3,
     date: "2024-01-16T09:00:00",
     duration: 30,
@@ -143,7 +134,7 @@ const mockSessions = [
     status: "Scheduled"
   },
   {
-    id: 4,
+    id: 3,
     studentId: 4,
     date: "2024-01-16T14:00:00",
     duration: 30,
@@ -152,13 +143,97 @@ const mockSessions = [
     status: "Scheduled"
   },
   {
+    id: 4,
+    studentId: 1,
+    date: "2024-01-17T09:00:00",
+    duration: 30,
+    type: "Individual",
+    goals: ["Articulation - /R/ sound practice"],
+    status: "Scheduled"
+  },
+  {
     id: 5,
     studentId: 5,
-    date: "2024-01-17T10:30:00",
+    date: "2024-01-18T11:00:00",
+    duration: 30,
+    type: "Individual",
+    goals: ["Reading comprehension", "Language structure"],
+    status: "Scheduled"
+  }
+];
+
+const mockGroupSessions = [
+  {
+    id: 'group-1',
+    name: "Social Communication Group",
+    date: "2024-01-15T13:00:00",
     duration: 45,
     type: "Group",
-    goals: ["Grammar practice", "Reading comprehension"],
-    status: "Scheduled"
+    studentIds: [2, 5], // Marcus Johnson, Sofia Martinez
+    goals: ["Social interaction", "Turn-taking", "Conversation skills"],
+    status: "Scheduled",
+    description: "Focus on peer interaction and social communication skills",
+    room: "Therapy Room A"
+  },
+  {
+    id: 'group-2',
+    name: "Articulation Practice Group",
+    date: "2024-01-16T15:30:00",
+    duration: 60,
+    type: "Group",
+    studentIds: [1, 4], // Emma Rodriguez, Dylan Chen
+    goals: ["Sound production", "Phonological awareness", "Peer modeling"],
+    status: "Scheduled",
+    description: "Group practice for /R/ and /S/ sound production",
+    room: "Therapy Room B"
+  },
+  {
+    id: 'group-3',
+    name: "Language Enrichment Group",
+    date: "2024-01-17T14:00:00",
+    duration: 50,
+    type: "Group",
+    studentIds: [3, 5, 2], // Aisha Patel, Sofia Martinez, Marcus Johnson
+    goals: ["Vocabulary expansion", "Grammar practice", "Narrative skills"],
+    status: "Scheduled",
+    description: "Advanced language skills for upper elementary students",
+    room: "Therapy Room C"
+  },
+  {
+    id: 'group-4',
+    name: "Fluency Support Group",
+    date: "2024-01-18T10:00:00",
+    duration: 45,
+    type: "Group",
+    studentIds: [2, 4], // Marcus Johnson, Dylan Chen
+    goals: ["Fluency techniques", "Confidence building", "Breathing exercises"],
+    status: "Scheduled",
+    description: "Supportive environment for fluency practice",
+    room: "Therapy Room A"
+  },
+  {
+    id: 'group-5',
+    name: "Reading Readiness Group",
+    date: "2024-01-19T09:30:00",
+    duration: 40,
+    type: "Group",
+    studentIds: [1, 4, 3], // Emma Rodriguez, Dylan Chen, Aisha Patel
+    goals: ["Pre-reading skills", "Phonemic awareness", "Letter-sound correspondence"],
+    status: "Scheduled",
+    description: "Foundation skills for reading success",
+    room: "Therapy Room B"
+  },
+  {
+    id: 'group-6',
+    name: "Peer Communication Circle",
+    date: "2024-01-22T11:30:00",
+    duration: 45,
+    type: "Group",
+    studentIds: [2, 3, 5], // Marcus Johnson, Aisha Patel, Sofia Martinez
+    goals: ["Peer interaction", "Problem solving", "Social pragmatics"],
+    status: "Scheduled",
+    description: "Interactive group for social communication development",
+    room: "Therapy Room C"
   }
 ];
 
