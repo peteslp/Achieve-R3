@@ -182,6 +182,53 @@ class AchieveAPITester:
             except:
                 print(f"Could not determine session count: {response}")
         return success, response
+        
+    def test_get_session_data(self, session_id):
+        """Test getting session data for a specific session"""
+        success, response = self.run_test(
+            f"Get Session Data for Session ID: {session_id}",
+            "GET",
+            f"api/sessions/{session_id}/data",
+            200
+        )
+        return success, response
+        
+    def test_update_session_data(self, session_id, student_id, data):
+        """Test updating session data for a specific student in a session"""
+        success, response = self.run_test(
+            f"Update Session Data for Student ID: {student_id} in Session ID: {session_id}",
+            "PUT",
+            f"api/sessions/{session_id}/data/{student_id}",
+            200,
+            data=data
+        )
+        return success, response
+        
+    def test_add_trial_data(self, session_id, student_id, goal_id, was_correct):
+        """Test adding trial data for a specific goal"""
+        success, response = self.run_test(
+            f"Add Trial Data for Goal ID: {goal_id}, Student ID: {student_id}, Session ID: {session_id}",
+            "POST",
+            f"api/sessions/{session_id}/trial",
+            201,
+            data={
+                "student_id": student_id,
+                "goal_id": goal_id,
+                "was_correct": was_correct
+            }
+        )
+        return success, response
+        
+    def test_update_behavior_data(self, session_id, student_id, behavior_data):
+        """Test updating behavior data for a specific student in a session"""
+        success, response = self.run_test(
+            f"Update Behavior Data for Student ID: {student_id} in Session ID: {session_id}",
+            "PUT",
+            f"api/sessions/{session_id}/behavior/{student_id}",
+            200,
+            data=behavior_data
+        )
+        return success, response
 
 def main():
     # Setup
