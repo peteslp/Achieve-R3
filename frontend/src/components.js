@@ -716,9 +716,6 @@ export const Caseload = ({ currentUser, onLogout }) => {
       case 'schedule':
         navigate('/schedule');
         break;
-      case 'students':
-        navigate('/students');
-        break;
       default:
         navigate('/caseload');
     }
