@@ -469,6 +469,10 @@ export const Dashboard = ({ currentUser, onLogout }) => {
     format(new Date(session.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
   );
 
+  const todayGroupSessions = mockGroupSessions.filter(session =>
+    format(new Date(session.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  );
+
   const handleTabChange = (tab) => {
     setCurrentTab(tab);
     switch(tab) {
