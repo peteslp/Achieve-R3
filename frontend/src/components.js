@@ -32,38 +32,6 @@ const formatDateForSessions = (date) => {
 // Get current week dates for scheduling
 const currentWeekDates = getCurrentWeekDates();
 
-// Helper functions for current dates
-const getCurrentWeekDates = () => {
-  const today = new Date();
-  const currentWeek = [];
-  const startOfCurrentWeek = new Date(today);
-  startOfCurrentWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-  
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startOfCurrentWeek);
-    date.setDate(startOfCurrentWeek.getDate() + i);
-    currentWeek.push(date);
-  }
-  return currentWeek;
-};
-
-const formatDateForSessions = (date) => {
-  return date.toISOString();
-};
-
-// Get current week dates for scheduling
-const currentWeekDates = getCurrentWeekDates();
-
-// Helper function for progress color styling
-const getProgressColor = (level) => {
-  switch(level) {
-    case 'Excellent': return 'text-green-600 bg-green-100';
-    case 'Progressing': return 'text-blue-600 bg-blue-100';
-    case 'Needs Support': return 'text-orange-600 bg-orange-100';
-    default: return 'text-slate-600 bg-slate-100';
-  }
-};
-
 // Mock Data
 const mockStudents = [
   {
