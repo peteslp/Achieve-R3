@@ -1195,6 +1195,458 @@ export const Schedule = ({ currentUser, onLogout }) => {
   );
 };
 
+// LiveSession Component for Data Collection
+export const LiveSession = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  const { sessionId } = useParams();
+  const [currentTab, setCurrentTab] = useState('schedule');
+  const [activeStudentTab, setActiveStudentTab] = useState(0);
+  const [sessionData, setSessionData] = useState({});
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Find the session data
+  const session = React.useMemo(() => {
+    // Try to find in individual sessions first
+    let foundSession = mockSessions.find(s => s.id.toString() === sessionId);
+    if (foundSession) {
+      return { ...foundSession, isGroup: false };
+    }
+    
+    // Try to find in group sessions
+    foundSession = mockGroupSessions.find(s => s.id.toString() === sessionId);
+    if (foundSession) {
+      return { ...foundSession, isGroup: true };
+    }
+    
+    return null;
+  }, [sessionId]);
+
+  const students = React.useMemo(() => {
+    if (!session) return [];
+    
+    if (session.isGroup) {
+      return session.studentIds.map(id => mockStudents.find(s => s.id === id)).filter(Boolean);
+    } else {
+      const student = mockStudents.find(s => s.id === session.studentId);
+      return student ? [student] : [];
+    }
+  }, [session]);
+
+  const activeStudent = students[activeStudentTab] || students[0];
+
+  // Timer effect
+  React.useEffect(() => {
+    let interval;
+    if (isSessionActive && sessionStartTime) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((new Date().getTime() - sessionStartTime.getTime()) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isSessionActive, sessionStartTime]);
+
+  // Initialize session data for each student
+  React.useEffect(() => {
+    if (students.length > 0) {
+      const initialData = {};
+      students.forEach(student => {
+        initialData[student.id] = {
+          goals: student.primaryGoals.map((goal, index) => ({
+            id: index,
+            description: goal,
+            attempts: [],
+            currentTrials: 0,
+            accuracy: 0,
+            notes: '',
+            status: 'not-started' // not-started, in-progress, completed
+          })),
+          behaviorData: {
+            engagement: 5,
+            cooperation: 5,
+            attention: 5,
+            notes: ''
+          },
+          sessionNotes: '',
+          nextSteps: ''
+        };
+      });
+      setSessionData(initialData);
+    }
+  }, [students]);
+
+  const handleTabChange = (tab) => {
+    setCurrentTab(tab);
+    switch(tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
+      case 'caseload':
+        navigate('/caseload');
+        break;
+      case 'students':
+        navigate('/students');
+        break;
+      default:
+        navigate('/schedule');
+    }
+  };
+
+  const startSession = () => {
+    setIsSessionActive(true);
+    setSessionStartTime(new Date());
+    setElapsedTime(0);
+  };
+
+  const endSession = () => {
+    setIsSessionActive(false);
+    // Here you would typically save the session data
+    alert('Session ended! Data saved successfully.');
+    navigate('/schedule');
+  };
+
+  const addTrialData = (studentId, goalId, wasCorrect) => {
+    setSessionData(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        goals: prev[studentId].goals.map(goal => {
+          if (goal.id === goalId) {
+            const newAttempts = [...goal.attempts, wasCorrect];
+            const newTrials = goal.currentTrials + 1;
+            const newAccuracy = Math.round((newAttempts.filter(a => a).length / newTrials) * 100);
+            return {
+              ...goal,
+              attempts: newAttempts,
+              currentTrials: newTrials,
+              accuracy: newAccuracy,
+              status: newTrials > 0 ? 'in-progress' : 'not-started'
+            };
+          }
+          return goal;
+        })
+      }
+    }));
+  };
+
+  const updateSessionNotes = (studentId, field, value) => {
+    setSessionData(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [field]: value
+      }
+    }));
+  };
+
+  const updateBehaviorData = (studentId, behavior, value) => {
+    setSessionData(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        behaviorData: {
+          ...prev[studentId].behaviorData,
+          [behavior]: value
+        }
+      }
+    }));
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Session Not Found</h2>
+          <button 
+            onClick={() => navigate('/schedule')}
+            className="text-blue-600 hover:text-blue-500"
+          >
+            Return to Schedule
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentStudentData = sessionData[activeStudent?.id] || {};
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navigation 
+        currentTab={currentTab} 
+        onTabChange={handleTabChange} 
+        onLogout={onLogout}
+        currentUser={currentUser}
+      />
+      
+      <div className="p-6">
+        {/* Session Header */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => navigate('/schedule')}
+                className="p-2 hover:bg-slate-100 rounded-lg"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">
+                  {session.isGroup ? session.name : `${activeStudent?.name} - Individual Session`}
+                </h1>
+                <p className="text-slate-600">
+                  {format(new Date(session.date), 'EEEE, MMMM dd, yyyy')} • {format(new Date(session.date), 'h:mm a')} • {session.duration} minutes
+                  {session.room && ` • ${session.room}`}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              {/* Session Timer */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">
+                  {formatTime(elapsedTime)}
+                </div>
+                <div className="text-xs text-slate-500">
+                  {session.duration} min session
+                </div>
+              </div>
+              
+              {/* Session Controls */}
+              {!isSessionActive ? (
+                <button
+                  onClick={startSession}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                >
+                  <Activity className="h-4 w-4" />
+                  <span>Start Session</span>
+                </button>
+              ) : (
+                <button
+                  onClick={endSession}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center space-x-2"
+                >
+                  <Clock className="h-4 w-4" />
+                  <span>End Session</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Student Tabs for Group Sessions */}
+          {students.length > 1 && (
+            <div className="flex space-x-1 bg-slate-100 rounded-lg p-1">
+              {students.map((student, index) => (
+                <button
+                  key={student.id}
+                  onClick={() => setActiveStudentTab(index)}
+                  className={clsx(
+                    "flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors flex-1",
+                    activeStudentTab === index
+                      ? "bg-white text-blue-600 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  <img src={student.avatar} alt={student.name} className="w-6 h-6 rounded-full object-cover" />
+                  <span>{student.name}</span>
+                  <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">
+                    {student.grade}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Active Student Data Collection */}
+        {activeStudent && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Goals and Data Collection */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">
+                  Goals & Data Collection - {activeStudent.name}
+                </h3>
+                
+                <div className="space-y-4">
+                  {currentStudentData.goals?.map((goal, index) => (
+                    <div key={goal.id} className="border border-slate-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-slate-900">Goal {index + 1}</h4>
+                        <span className={clsx(
+                          "px-2 py-1 rounded-full text-xs font-medium",
+                          goal.status === 'completed' ? 'bg-green-100 text-green-600' :
+                          goal.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
+                          'bg-slate-100 text-slate-600'
+                        )}>
+                          {goal.status.replace('-', ' ')}
+                        </span>
+                      </div>
+                      
+                      <p className="text-slate-700 mb-3">{goal.description}</p>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div className="text-center p-3 bg-slate-50 rounded-lg">
+                          <div className="text-2xl font-bold text-slate-900">{goal.currentTrials}</div>
+                          <div className="text-xs text-slate-500">Trials</div>
+                        </div>
+                        <div className="text-center p-3 bg-slate-50 rounded-lg">
+                          <div className="text-2xl font-bold text-slate-900">{goal.accuracy}%</div>
+                          <div className="text-xs text-slate-500">Accuracy</div>
+                        </div>
+                      </div>
+                      
+                      {/* Trial Data Input */}
+                      {isSessionActive && (
+                        <div className="flex space-x-2 mb-3">
+                          <button
+                            onClick={() => addTrialData(activeStudent.id, goal.id, true)}
+                            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Correct</span>
+                          </button>
+                          <button
+                            onClick={() => addTrialData(activeStudent.id, goal.id, false)}
+                            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 flex items-center justify-center space-x-2"
+                          >
+                            <AlertCircle className="h-4 w-4" />
+                            <span>Incorrect</span>
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Recent Trials Display */}
+                      {goal.attempts.length > 0 && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-slate-500 mr-2">Recent:</span>
+                          {goal.attempts.slice(-10).map((attempt, i) => (
+                            <div
+                              key={i}
+                              className={clsx(
+                                "w-4 h-4 rounded-full",
+                                attempt ? "bg-green-500" : "bg-red-500"
+                              )}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Goal Notes */}
+                      <textarea
+                        placeholder="Goal-specific notes..."
+                        className="w-full mt-3 p-2 border border-slate-300 rounded-lg text-sm"
+                        rows="2"
+                        value={goal.notes}
+                        onChange={(e) => {
+                          const updatedGoals = currentStudentData.goals.map(g => 
+                            g.id === goal.id ? { ...g, notes: e.target.value } : g
+                          );
+                          updateSessionNotes(activeStudent.id, 'goals', updatedGoals);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Behavior Data and Notes */}
+            <div className="space-y-6">
+              {/* Behavior Tracking */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Behavior Data</h3>
+                
+                <div className="space-y-4">
+                  {[
+                    { key: 'engagement', label: 'Engagement', icon: Star },
+                    { key: 'cooperation', label: 'Cooperation', icon: Users },
+                    { key: 'attention', label: 'Attention', icon: Target }
+                  ].map(behavior => (
+                    <div key={behavior.key}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <behavior.icon className="h-4 w-4 text-slate-600" />
+                          <span className="text-sm font-medium text-slate-900">{behavior.label}</span>
+                        </div>
+                        <span className="text-sm text-slate-600">
+                          {currentStudentData.behaviorData?.[behavior.key] || 5}/10
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={currentStudentData.behaviorData?.[behavior.key] || 5}
+                        onChange={(e) => updateBehaviorData(activeStudent.id, behavior.key, parseInt(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                <textarea
+                  placeholder="Behavior notes..."
+                  className="w-full mt-4 p-3 border border-slate-300 rounded-lg text-sm"
+                  rows="3"
+                  value={currentStudentData.behaviorData?.notes || ''}
+                  onChange={(e) => updateBehaviorData(activeStudent.id, 'notes', e.target.value)}
+                />
+              </div>
+
+              {/* Session Notes */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Session Notes</h3>
+                
+                <textarea
+                  placeholder="Overall session notes for this student..."
+                  className="w-full p-3 border border-slate-300 rounded-lg text-sm"
+                  rows="4"
+                  value={currentStudentData.sessionNotes || ''}
+                  onChange={(e) => updateSessionNotes(activeStudent.id, 'sessionNotes', e.target.value)}
+                />
+              </div>
+
+              {/* Next Steps */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Next Steps</h3>
+                
+                <textarea
+                  placeholder="Recommendations for next session..."
+                  className="w-full p-3 border border-slate-300 rounded-lg text-sm"
+                  rows="3"
+                  value={currentStudentData.nextSteps || ''}
+                  onChange={(e) => updateSessionNotes(activeStudent.id, 'nextSteps', e.target.value)}
+                />
+              </div>
+
+              {/* AI Recommendations */}
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Brain className="h-5 w-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-purple-900">AI Recommendations</h3>
+                </div>
+                <div className="space-y-2 text-sm text-purple-800">
+                  <p>• Consider increasing trial difficulty based on 78% accuracy</p>
+                  <p>• Strong engagement suggests readiness for peer interaction activities</p>
+                  <p>• Recommend visual cue fading for next session</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Students Component (keeping it simple for now)
 export const Students = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
