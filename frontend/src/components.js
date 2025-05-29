@@ -506,17 +506,14 @@ export const Dashboard = ({ currentUser, onLogout }) => {
   const handleTabChange = (tab) => {
     setCurrentTab(tab);
     switch(tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
       case 'caseload':
         navigate('/caseload');
         break;
-      case 'schedule':
-        navigate('/schedule');
-        break;
-      case 'students':
-        navigate('/students');
-        break;
       default:
-        navigate('/');
+        navigate('/schedule');
     }
   };
 
