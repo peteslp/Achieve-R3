@@ -25,8 +25,9 @@ const getCurrentWeekDates = () => {
   return currentWeek;
 };
 
-const formatDateForSessions = (date) => {
-  return date.toISOString();
+const formatDateForSessions = (timestamp) => {
+  // Convert timestamp to Date object before calling toISOString
+  return new Date(timestamp).toISOString();
 };
 
 const getProgressColor = (level) => {
