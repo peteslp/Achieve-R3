@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { Login, ScheduleGrid } from './components';
+import { Dashboard, Caseload, Schedule, StudentDetail, Login, LiveSession, ScheduleGrid } from './components';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
