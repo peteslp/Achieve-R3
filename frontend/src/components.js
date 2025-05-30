@@ -333,16 +333,30 @@ const SimpleNavigation = ({ currentUser, onLogout }) => {
   );
 };
 
-// ScheduleGrid Component - Bird's Eye View with Drag & Drop
+// ScheduleGrid Component - Bird's Eye View with Drag & Drop (5-minute increments)
 export const ScheduleGrid = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState(new Date());
   const [scheduleData, setScheduleData] = useState(() => {
-    // Initialize schedule data structure
+    // Initialize schedule data structure with 5-minute increments
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    const timeSlots = [
-      '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '1:00', '2:00', '3:00'
-    ];
+    
+    // Generate 5-minute time slots from 7:00 AM to 5:00 PM (10 hours = 120 slots)
+    const generateTimeSlots = () => {
+      const slots = [];
+      const startHour = 7; // 7:00 AM
+      const endHour = 17; // 5:00 PM
+      
+      for (let hour = startHour; hour < endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += 5) {
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          slots.push(timeString);
+        }
+      }
+      return slots;
+    };
+    
+    const timeSlots = generateTimeSlots();
     
     const initialData = {};
     days.forEach(day => {
@@ -352,25 +366,25 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
       });
     });
 
-    // Populate with existing sessions and groups
+    // Populate with existing sessions and groups (using precise times)
     const sessions = [
-      // Individual Sessions
-      { id: 'ind-1', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Monday', time: '10:00', duration: 30 },
-      { id: 'ind-2', student: 'Aisha Patel', type: 'individual', color: 'bg-green-200 border-green-400', day: 'Tuesday', time: '9:00', duration: 30 },
-      { id: 'ind-3', student: 'Dylan Chen', type: 'individual', color: 'bg-yellow-200 border-yellow-400', day: 'Tuesday', time: '2:00', duration: 30 },
-      { id: 'ind-4', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Wednesday', time: '9:00', duration: 30 },
-      { id: 'ind-5', student: 'Sofia Martinez', type: 'individual', color: 'bg-purple-200 border-purple-400', day: 'Thursday', time: '11:00', duration: 30 },
-      { id: 'ind-6', student: 'Marcus Johnson', type: 'individual', color: 'bg-red-200 border-red-400', day: 'Friday', time: '10:00', duration: 30 },
+      // Individual Sessions with precise timing
+      { id: 'ind-1', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Monday', time: '09:35', duration: 30 },
+      { id: 'ind-2', student: 'Aisha Patel', type: 'individual', color: 'bg-green-200 border-green-400', day: 'Tuesday', time: '08:20', duration: 30 },
+      { id: 'ind-3', student: 'Dylan Chen', type: 'individual', color: 'bg-yellow-200 border-yellow-400', day: 'Tuesday', time: '14:10', duration: 30 },
+      { id: 'ind-4', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Wednesday', time: '10:15', duration: 30 },
+      { id: 'ind-5', student: 'Sofia Martinez', type: 'individual', color: 'bg-purple-200 border-purple-400', day: 'Thursday', time: '11:25', duration: 30 },
+      { id: 'ind-6', student: 'Marcus Johnson', type: 'individual', color: 'bg-red-200 border-red-400', day: 'Friday', time: '09:45', duration: 30 },
 
-      // Group Sessions
+      // Group Sessions with precise timing
       { 
         id: 'group-1', 
-        name: 'Social Communication Group',
+        name: 'Social Communication',
         students: ['Marcus Johnson', 'Sofia Martinez'], 
         type: 'group', 
         color: 'bg-pink-200 border-pink-400', 
         day: 'Monday', 
-        time: '1:00', 
+        time: '13:30', 
         duration: 45 
       },
       { 
@@ -380,17 +394,17 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
         type: 'group', 
         color: 'bg-cyan-200 border-cyan-400', 
         day: 'Tuesday', 
-        time: '3:00', 
-        duration: 60 
+        time: '15:15', 
+        duration: 45 
       },
       { 
         id: 'group-3', 
         name: 'Language Enrichment',
-        students: ['Aisha Patel', 'Sofia Martinez', 'Marcus Johnson'], 
+        students: ['Aisha Patel', 'Sofia Martinez'], 
         type: 'group', 
         color: 'bg-orange-200 border-orange-400', 
         day: 'Wednesday', 
-        time: '2:00', 
+        time: '14:05', 
         duration: 50 
       },
       { 
@@ -400,17 +414,17 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
         type: 'group', 
         color: 'bg-teal-200 border-teal-400', 
         day: 'Thursday', 
-        time: '10:00', 
-        duration: 45 
+        time: '10:40', 
+        duration: 35 
       },
       { 
         id: 'group-5', 
         name: 'Reading Readiness',
-        students: ['Emma Rodriguez', 'Dylan Chen', 'Aisha Patel'], 
+        students: ['Emma Rodriguez', 'Aisha Patel'], 
         type: 'group', 
         color: 'bg-indigo-200 border-indigo-400', 
         day: 'Friday', 
-        time: '9:00', 
+        time: '08:50', 
         duration: 40 
       }
     ];
@@ -506,7 +520,7 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
       color: 'bg-gray-200 border-gray-400',
       day,
       time,
-      duration: 45
+      duration: 30
     };
 
     setScheduleData(prev => ({
@@ -528,8 +542,49 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
     }));
   };
 
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  const timeSlots = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '1:00', '2:00', '3:00'];
+  
+  // Generate time slots for display - show every 15 minutes for better readability
+  const generateDisplayTimeSlots = () => {
+    const slots = [];
+    const startHour = 7;
+    const endHour = 17;
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        slots.push(timeString);
+      }
+    }
+    return slots;
+  };
+
+  const displayTimeSlots = generateDisplayTimeSlots();
+
+  // Get all sessions for a 15-minute block (includes 3 five-minute slots)
+  const getSessionsForTimeBlock = (day, baseTime) => {
+    const [baseHour, baseMinute] = baseTime.split(':').map(Number);
+    const sessions = [];
+    
+    // Check the 15-minute block (3 five-minute slots)
+    for (let offset = 0; offset < 15; offset += 5) {
+      const minute = baseMinute + offset;
+      const timeSlot = `${baseHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      if (scheduleData[day] && scheduleData[day][timeSlot]) {
+        sessions.push(...scheduleData[day][timeSlot].map(session => ({ ...session, exactTime: timeSlot })));
+      }
+    }
+    
+    return sessions;
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -541,7 +596,7 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold text-slate-900 mb-2">Schedule Grid</h1>
-              <p className="text-slate-600">Drag and drop to manage your weekly schedule</p>
+              <p className="text-slate-600">Drag and drop to manage your weekly schedule (5-minute precision)</p>
             </div>
             <div className="flex items-center space-x-3">
               <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
@@ -556,7 +611,7 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 sticky top-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Students</h3>
-                <p className="text-sm text-slate-600 mb-4">Drag students to schedule slots</p>
+                <p className="text-sm text-slate-600 mb-4">Drag students to precise time slots</p>
                 
                 <div className="space-y-3">
                   {availableStudents.map(student => (
@@ -565,8 +620,14 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-200">
-                  <h4 className="font-medium text-slate-900 mb-2">Actions</h4>
-                  <div className="space-y-2">
+                  <h4 className="font-medium text-slate-900 mb-2">Time Precision</h4>
+                  <div className="text-sm text-slate-600 space-y-1">
+                    <p>• 5-minute increments</p>
+                    <p>• Precise therapy timing</p>
+                    <p>• Example: 9:35-10:05</p>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
                     <button className="w-full bg-green-600 text-white py-2 px-3 rounded-lg text-sm hover:bg-green-700">
                       Create Group
                     </button>
@@ -614,56 +675,75 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
                   ))}
                 </div>
 
-                {/* Grid Body */}
-                <div className="max-h-[600px] overflow-y-auto">
-                  {timeSlots.map(time => (
-                    <div key={time} className="grid grid-cols-6 border-b border-slate-200 min-h-[80px]">
-                      {/* Time Column */}
-                      <div className="p-3 bg-slate-50 border-r border-slate-200 flex items-center">
-                        <span className="font-medium text-slate-900">{time}</span>
-                      </div>
+                {/* Grid Body with 5-minute precision */}
+                <div className="max-h-[700px] overflow-y-auto">
+                  {displayTimeSlots.map(time => {
+                    const [hour, minute] = time.split(':').map(Number);
+                    return (
+                      <div key={time} className="grid grid-cols-6 border-b border-slate-100 min-h-[60px]">
+                        {/* Time Column */}
+                        <div className="p-2 bg-slate-50 border-r border-slate-200 flex items-center">
+                          <span className="font-medium text-slate-900 text-sm">{formatTime(time)}</span>
+                        </div>
 
-                      {/* Day Columns */}
-                      {days.map(day => (
-                        <DropZone
-                          key={`${day}-${time}`}
-                          day={day}
-                          time={time}
-                          sessions={scheduleData[day][time]}
-                          onDrop={handleDrop}
-                          onDelete={deleteSession}
-                          onRemoveStudentFromGroup={removeStudentFromGroup}
-                          onCreateGroup={createNewGroup}
-                        />
-                      ))}
-                    </div>
-                  ))}
+                        {/* Day Columns - Each represents a 15-minute block but accepts 5-minute drops */}
+                        {days.map(day => {
+                          const sessions = getSessionsForTimeBlock(day, time);
+                          return (
+                            <div key={`${day}-${time}`} className="relative">
+                              {/* Create 3 drop zones for 5-minute increments within this 15-minute block */}
+                              {[0, 5, 10].map(offset => {
+                                const exactMinute = minute + offset;
+                                const exactTime = `${hour.toString().padStart(2, '0')}:${exactMinute.toString().padStart(2, '0')}`;
+                                const sessionsAtExactTime = scheduleData[day]?.[exactTime] || [];
+                                
+                                return (
+                                  <div key={exactTime} className="h-5 border-b border-slate-100">
+                                    <DropZone
+                                      day={day}
+                                      time={exactTime}
+                                      sessions={sessionsAtExactTime}
+                                      onDrop={handleDrop}
+                                      onDelete={deleteSession}
+                                      onRemoveStudentFromGroup={removeStudentFromGroup}
+                                      onCreateGroup={createNewGroup}
+                                      isCompact={true}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Legend */}
               <div className="mt-4 bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-                <h4 className="font-medium text-slate-900 mb-3">Legend</h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-blue-200 border border-blue-400 rounded"></div>
-                    <span className="text-sm text-slate-600">Individual Session</span>
+                <h4 className="font-medium text-slate-900 mb-3">Legend & Instructions</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-blue-200 border border-blue-400 rounded"></div>
+                      <span className="text-sm text-slate-600">Individual Session</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-pink-200 border border-pink-400 rounded"></div>
+                      <span className="text-sm text-slate-600">Group Session</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded border-dashed"></div>
+                      <span className="text-sm text-slate-600">Available Slot</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-pink-200 border border-pink-400 rounded"></div>
-                    <span className="text-sm text-slate-600">Group Session</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded border-dashed"></div>
-                    <span className="text-sm text-slate-600">Available Slot</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-yellow-200 border border-yellow-400 rounded"></div>
-                    <span className="text-sm text-slate-600">Assessment</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-red-200 border border-red-400 rounded"></div>
-                    <span className="text-sm text-slate-600">Blocked Time</span>
+                  <div className="text-sm text-slate-600 space-y-1">
+                    <p><strong>5-Minute Precision:</strong></p>
+                    <p>• Drag students to any 5-minute slot</p>
+                    <p>• Sessions can start at :00, :05, :10, etc.</p>
+                    <p>• Perfect for precise therapy timing</p>
                   </div>
                 </div>
               </div>
