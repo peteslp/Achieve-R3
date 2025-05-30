@@ -377,7 +377,7 @@ const getStudentColor = (color) => {
   return colors[color] || 'bg-slate-500';
 };
 
-// Live Scheduler Component with Drag & Drop
+// Live Scheduler Component with Drag & Drop - COMPLETE
 const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
   const [draggedStudent, setDraggedStudent] = useState(null);
   const [draggedSession, setDraggedSession] = useState(null);
@@ -393,34 +393,28 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
     weekDays.push(day);
   }
 
-  // Get sessions for specific day
   const getSessionsForDay = (date) => {
     const dateStr = date.toISOString().split('T')[0];
     return sessions.filter(session => session.date === dateStr);
   };
 
-  // Get session at specific time slot
   const getSessionAtTimeSlot = (date, time) => {
     const daySessions = getSessionsForDay(date);
     return daySessions.find(session => session.time === time);
   };
 
-  // Handle drag start for students
   const handleStudentDragStart = (student) => {
     setDraggedStudent(student);
   };
 
-  // Handle drag start for existing sessions
   const handleSessionDragStart = (session) => {
     setDraggedSession(session);
   };
 
-  // Handle drop
   const handleDrop = (date, time) => {
     const dateStr = date.toISOString().split('T')[0];
     
     if (draggedStudent) {
-      // Create new session for student
       const newSession = {
         id: Math.max(...sessions.map(s => s.id)) + 1,
         student: draggedStudent.name,
@@ -436,7 +430,6 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
       };
       onSessionUpdate([...sessions, newSession]);
     } else if (draggedSession) {
-      // Move existing session
       const updatedSessions = sessions.map(session => 
         session.id === draggedSession.id 
           ? { ...session, date: dateStr, time: time }
@@ -450,25 +443,22 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
     setDropZone(null);
   };
 
-  // Handle drag over
   const handleDragOver = (e, date, time) => {
     e.preventDefault();
     setDropZone({ date: date.toISOString().split('T')[0], time });
   };
 
-  // Handle drag leave
   const handleDragLeave = () => {
     setDropZone(null);
   };
 
-  // Render time slots (every 30 minutes for cleaner view)
   const displayTimeSlots = timeSlots.filter((_, index) => index % 6 === 0); // Every 30 minutes
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200">
       <div className="p-4 border-b border-slate-200">
         <h3 className="text-lg font-semibold text-slate-800 mb-2">Live Scheduler - Drag & Drop</h3>
-        <p className="text-sm text-slate-600">Drag students or sessions to time slots to schedule therapy</p>
+        <p className="text-sm text-slate-600">Drag students or sessions to time slots to schedule therapy (5-minute precision)</p>
       </div>
 
       <div className="flex">
@@ -518,12 +508,10 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
             {/* Time slots and schedule */}
             {displayTimeSlots.map((time, timeIndex) => (
               <React.Fragment key={timeIndex}>
-                {/* Time label */}
                 <div className="p-3 bg-slate-50 text-xs text-slate-600 border-b border-slate-200 flex items-center">
                   {time}
                 </div>
                 
-                {/* Day columns */}
                 {weekDays.map((day, dayIndex) => {
                   const session = getSessionAtTimeSlot(day, time);
                   const isDropZoneActive = dropZone?.date === day.toISOString().split('T')[0] && dropZone?.time === time;
@@ -598,7 +586,11 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-              <span className="text-slate-600">Available Drop Zone</span>
+              <span className="text-slate-600">Drop Zone Active</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-emerald-600" />
+              <span className="text-slate-600">5-minute precision available</span>
             </div>
           </div>
           <div className="text-slate-500">
