@@ -58,6 +58,37 @@ class AchieveAPITester:
             200
         )
         return success
+    
+    def test_root_endpoint(self):
+        """Test the root API endpoint"""
+        success, _ = self.run_test(
+            "Root API Endpoint",
+            "GET",
+            "api/",
+            200
+        )
+        return success
+    
+    def test_status_endpoint(self):
+        """Test the status endpoint"""
+        success, _ = self.run_test(
+            "Status Endpoint",
+            "POST",
+            "api/status",
+            200,
+            data={"client_name": "Test Client"}
+        )
+        return success
+    
+    def test_get_status_checks(self):
+        """Test getting status checks"""
+        success, _ = self.run_test(
+            "Get Status Checks",
+            "GET",
+            "api/status",
+            200
+        )
+        return success
 
 def main():
     # Setup
@@ -68,6 +99,11 @@ def main():
         print("❌ Server health check failed, stopping tests")
     else:
         print("✅ Server is running")
+        
+        # Test other endpoints
+        tester.test_root_endpoint()
+        tester.test_status_endpoint()
+        tester.test_get_status_checks()
 
     # Print results
     print(f"\n📊 Tests passed: {tester.tests_passed}/{tester.tests_run}")
