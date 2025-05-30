@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Calendar, ChevronLeft, ChevronRight, Plus, Clock, User,
-  Users, MapPin, Edit, Trash2, Eye, Filter, Grid, List, CalendarDays
+  Users, MapPin, Edit, Trash2, Eye, Filter, Grid, List, CalendarDays, Target
 } from 'lucide-react';
 
 // Extended students array with colors
