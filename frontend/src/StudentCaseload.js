@@ -119,30 +119,30 @@ const StudentCard = ({ student, onSelect, isSelected }) => {
   
   return (
     <div 
-      className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-        isSelected ? 'border-blue-500 shadow-md' : 'border-gray-200'
+      className={`bg-white rounded-xl shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
+        isSelected ? 'border-slate-500 shadow-md' : 'border-slate-200'
       }`}
       onClick={() => onSelect(student)}
     >
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-slate-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
-              <p className="text-sm text-gray-600">Age {student.age} • {student.grade}</p>
+              <h3 className="text-lg font-semibold text-slate-900">{student.name}</h3>
+              <p className="text-sm text-slate-600">Age {student.age} • {student.grade}</p>
               <div className="mt-2 flex flex-wrap gap-1">
                 {student.diagnosis.map((dx, index) => (
-                  <span key={index} className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                  <span key={index} className="inline-block px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
                     {dx}
                   </span>
                 ))}
               </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <ChevronRight className="w-5 h-5 text-slate-400" />
         </div>
         
         <div className="mt-4 grid grid-cols-2 gap-4">
@@ -153,11 +153,11 @@ const StudentCard = ({ student, onSelect, isSelected }) => {
           </div>
           <div className="flex items-center space-x-2">
             {getTrendIcon(student.recentProgress.trend)}
-            <span className="text-sm font-medium text-gray-700">{student.recentProgress.score}%</span>
+            <span className="text-sm font-medium text-slate-700">{student.recentProgress.score}%</span>
           </div>
         </div>
         
-        <div className="mt-4 flex justify-between text-sm text-gray-600">
+        <div className="mt-4 flex justify-between text-sm text-slate-600">
           <span>Frequency: {student.sessionFrequency}</span>
           <span>Next IEP: {new Date(student.nextIEP).toLocaleDateString()}</span>
         </div>
