@@ -260,7 +260,7 @@ const DraggableSession = ({ session, onDelete, onRemoveStudentFromGroup }) => {
 };
 
 // Drop Zone Component
-const DropZone = ({ day, time, sessions, onDrop, onDelete, onRemoveStudentFromGroup, onCreateGroup }) => {
+const DropZone = ({ day, time, sessions, onDrop, onDelete, onRemoveStudentFromGroup, onCreateGroup, isCompact = false }) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: [ItemTypes.STUDENT, ItemTypes.SESSION],
     drop: (item, monitor) => {
@@ -271,6 +271,45 @@ const DropZone = ({ day, time, sessions, onDrop, onDelete, onRemoveStudentFromGr
       isOver: monitor.isOver(),
     }),
   }));
+
+  if (isCompact) {
+    return (
+      <div
+        ref={drop}
+        className={clsx(
+          "w-full h-full relative",
+          isOver ? 'bg-blue-100' : 'bg-transparent'
+        )}
+      >
+        {sessions.map(session => (
+          <div
+            key={session.id}
+            className={clsx(
+              "absolute inset-0 text-xs p-1 rounded border cursor-pointer hover:shadow-sm",
+              session.color,
+              "overflow-hidden"
+            )}
+            title={`${session.student || session.name} - ${time} (${session.duration}min)`}
+          >
+            <div className="truncate font-medium">
+              {session.type === 'individual' ? session.student : session.name}
+            </div>
+            {session.type === 'group' && (
+              <div className="text-xs opacity-75 truncate">
+                {session.students.join(', ')}
+              </div>
+            )}
+          </div>
+        ))}
+        
+        {sessions.length === 0 && isOver && (
+          <div className="absolute inset-0 bg-blue-200 border-2 border-dashed border-blue-400 rounded flex items-center justify-center">
+            <span className="text-xs text-blue-700">Drop here</span>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
