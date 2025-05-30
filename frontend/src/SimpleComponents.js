@@ -184,6 +184,27 @@ const MainApp = ({ currentUser, onLogout }) => {
 
 // Modern Dashboard Content Component
 const DashboardContent = () => {
+  const upcomingIEPs = [
+    { student: "Sophia Chen", date: "2024-07-30", type: "Annual Review", priority: "high" },
+    { student: "Marcus Thompson", date: "2024-08-15", type: "3-Year Re-evaluation", priority: "medium" },
+    { student: "Emma Rodriguez", date: "2024-08-20", type: "Annual Review", priority: "medium" },
+  ];
+
+  const upcomingEvaluations = [
+    { student: "David Kim", date: "2024-07-25", type: "Progress Evaluation", assessor: "Dr. Johnson" },
+    { student: "Lily Wang", date: "2024-08-02", type: "Hearing Assessment", assessor: "Audiologist" },
+    { student: "Jake Mitchell", date: "2024-08-10", type: "Fluency Re-assessment", assessor: "Dr. Johnson" },
+  ];
+
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'high': return 'bg-red-100 text-red-700 border-red-200';
+      case 'medium': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'low': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -294,6 +315,86 @@ const DashboardContent = () => {
               </div>
               <span className="text-sm text-slate-600">1:00 PM - Individual</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* IEPs and Evaluations Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Upcoming IEPs */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800">Upcoming IEPs</h3>
+            </div>
+            <span className="text-sm text-slate-500">{upcomingIEPs.length} scheduled</span>
+          </div>
+          <div className="space-y-3">
+            {upcomingIEPs.map((iep, index) => (
+              <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="font-medium text-slate-800">{iep.student}</h4>
+                      <span className={`px-2 py-1 text-xs rounded-full border ${getPriorityColor(iep.priority)}`}>
+                        {iep.priority}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600">{iep.type}</p>
+                    <p className="text-xs text-slate-500 mt-1">{new Date(iep.date).toLocaleDateString('en-US', { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-slate-700">
+                      {Math.ceil((new Date(iep.date) - new Date()) / (1000 * 60 * 60 * 24))} days
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Evaluations */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800">Upcoming Evaluations</h3>
+            </div>
+            <span className="text-sm text-slate-500">{upcomingEvaluations.length} scheduled</span>
+          </div>
+          <div className="space-y-3">
+            {upcomingEvaluations.map((eval, index) => (
+              <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-slate-800 mb-1">{eval.student}</h4>
+                    <p className="text-sm text-slate-600">{eval.type}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {new Date(eval.date).toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })} • {eval.assessor}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-slate-700">
+                      {Math.ceil((new Date(eval.date) - new Date()) / (1000 * 60 * 60 * 24))} days
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
