@@ -24,8 +24,12 @@ function App() {
           <Login onLogin={handleLogin} />
         ) : (
           <Routes>
-            <Route path="/" element={<ScheduleGrid currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/" element={<Dashboard currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/caseload" element={<Caseload currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/schedule" element={<Schedule currentUser={currentUser} onLogout={handleLogout} />} />
             <Route path="/schedule-grid" element={<ScheduleGrid currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/student/:id" element={<StudentDetail currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/live-session/:sessionId" element={<LiveSession currentUser={currentUser} onLogout={handleLogout} />} />
           </Routes>
         )}
       </BrowserRouter>
