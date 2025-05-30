@@ -377,14 +377,14 @@ const DashboardContent = () => {
               <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium text-slate-800 mb-1">{eval.student}</h4>
-                    <p className="text-sm text-slate-600">{eval.type}</p>
+                    <h4 className="font-medium text-slate-800 mb-1">{evaluation.student}</h4>
+                    <p className="text-sm text-slate-600">{evaluation.type}</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {new Date(eval.date).toLocaleDateString('en-US', { 
+                      {new Date(evaluation.date).toLocaleDateString('en-US', { 
                         weekday: 'short', 
                         month: 'short', 
                         day: 'numeric' 
-                      })} • {eval.assessor}
+                      })} • {evaluation.assessor}
                     </p>
                   </div>
                   <div className="text-right">
