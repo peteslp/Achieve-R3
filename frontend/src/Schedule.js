@@ -377,7 +377,221 @@ const getStudentColor = (color) => {
   return colors[color] || 'bg-slate-500';
 };
 
-// Session Card Component - COMPLETE
+// Daily View Component - COMPLETE
+const DailyView = ({ currentDate, sessions, onSessionClick, onAddSession }) => {
+  const dateStr = currentDate.toISOString().split('T')[0];
+  const daySessions = sessions.filter(session => session.date === dateStr);
+  
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="p-4 border-b border-slate-200">
+        <h3 className="text-lg font-semibold text-slate-800">
+          {currentDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric',
+            year: 'numeric'
+          })}
+        </h3>
+        <p className="text-sm text-slate-600">{daySessions.length} sessions scheduled</p>
+      </div>
+      
+      <div className="divide-y divide-slate-200">
+        {timeSlots.filter((_, index) => index % 6 === 0).map((time, index) => { // Every 30 minutes
+          const sessionAtTime = daySessions.find(session => session.time === time);
+          
+          return (
+            <div key={index} className="flex items-center p-4 hover:bg-slate-50">
+              <div className="w-20 text-sm font-medium text-slate-700">{time}</div>
+              <div className="flex-1 ml-4">
+                {sessionAtTime ? (
+                  <SessionCard session={sessionAtTime} onClick={onSessionClick} />
+                ) : (
+                  <button
+                    onClick={() => onAddSession(currentDate, time)}
+                    className="w-full h-12 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg border-2 border-dashed border-slate-200 hover:border-slate-300 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Add Session</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Weekly View Component - COMPLETE
+const WeeklyView = ({ currentDate, sessions, onSessionClick, onAddSession }) => {
+  const weekStart = new Date(currentDate);
+  weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+  
+  const weekDays = [];
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(weekStart);
+    day.setDate(weekStart.getDate() + i);
+    weekDays.push(day);
+  }
+
+  const getSessionsForDay = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return sessions.filter(session => session.date === dateStr);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="grid grid-cols-8 border-b border-slate-200">
+        <div className="p-3 bg-slate-50 font-medium text-slate-700 text-sm">Time</div>
+        {weekDays.map((day, index) => (
+          <div key={index} className="p-3 text-center border-l border-slate-200">
+            <div className="font-medium text-slate-800 text-sm">
+              {day.toLocaleDateString('en-US', { weekday: 'short' })}
+            </div>
+            <div className="text-sm text-slate-600">{day.getDate()}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {getSessionsForDay(day).length} sessions
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-8 max-h-96 overflow-y-auto">
+        {/* Time column */}
+        <div className="bg-slate-50">
+          {timeSlots.filter((_, index) => index % 6 === 0).map((time, index) => ( // Every 30 minutes
+            <div key={index} className="h-20 p-2 border-b border-slate-200 text-xs text-slate-600 flex items-center">
+              {time}
+            </div>
+          ))}
+        </div>
+        
+        {/* Day columns */}
+        {weekDays.map((day, dayIndex) => (
+          <div key={dayIndex} className="border-l border-slate-200">
+            {timeSlots.filter((_, index) => index % 6 === 0).map((time, timeIndex) => {
+              const daySessions = getSessionsForDay(day);
+              const sessionAtTime = daySessions.find(session => session.time === time);
+              
+              return (
+                <div key={timeIndex} className="h-20 p-1 border-b border-slate-200 relative">
+                  {sessionAtTime ? (
+                    <SessionCard session={sessionAtTime} onClick={onSessionClick} isCompact={true} />
+                  ) : (
+                    <button
+                      onClick={() => onAddSession(day, time)}
+                      className="w-full h-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Monthly View Component - COMPLETE
+const MonthlyView = ({ currentDate, sessions, onSessionClick, onDayClick }) => {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDate = new Date(firstDay);
+  startDate.setDate(startDate.getDate() - firstDay.getDay());
+  
+  const days = [];
+  const current = new Date(startDate);
+  
+  while (current <= lastDay || current.getDay() !== 0) {
+    days.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+    if (days.length > 41) break;
+  }
+
+  const getSessionsForDay = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return sessions.filter(session => session.date === dateStr);
+  };
+
+  const isCurrentMonth = (date) => date.getMonth() === month;
+  const isToday = (date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="p-4 border-b border-slate-200">
+        <h3 className="text-lg font-semibold text-slate-800">
+          {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        </h3>
+      </div>
+      
+      <div className="grid grid-cols-7 border-b border-slate-200">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <div key={day} className="p-3 text-center font-medium text-slate-700 text-sm bg-slate-50">
+            {day}
+          </div>
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-7">
+        {days.map((day, index) => {
+          const daySessions = getSessionsForDay(day);
+          const isInCurrentMonth = isCurrentMonth(day);
+          const isTodayDate = isToday(day);
+          
+          return (
+            <div
+              key={index}
+              className={`h-24 p-2 border-b border-r border-slate-200 cursor-pointer hover:bg-slate-50 ${
+                !isInCurrentMonth ? 'bg-slate-50 text-slate-400' : ''
+              } ${isTodayDate ? 'bg-blue-50 border-blue-200' : ''}`}
+              onClick={() => onDayClick(day)}
+            >
+              <div className={`text-sm font-medium mb-1 ${
+                isTodayDate ? 'text-blue-600' : isInCurrentMonth ? 'text-slate-800' : 'text-slate-400'
+              }`}>
+                {day.getDate()}
+              </div>
+              <div className="space-y-1">
+                {daySessions.slice(0, 2).map((session, idx) => (
+                  <div
+                    key={idx}
+                    className={`text-xs px-2 py-1 rounded truncate ${
+                      session.type === 'Group' 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSessionClick(session);
+                    }}
+                  >
+                    {session.time} {session.student}
+                  </div>
+                ))}
+                {daySessions.length > 2 && (
+                  <div className="text-xs text-slate-500">
+                    +{daySessions.length - 2} more
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 const SessionCard = ({ session, onClick, isCompact = false }) => {
   const isGroup = session.type === 'Group';
   const studentColors = isGroup ? session.studentIds?.map(id => {
