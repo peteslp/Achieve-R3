@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 class AchieveAPITester:
-    def __init__(self, base_url="https://88e5d6a6-a172-4bf7-af09-0703f927e55b.preview.emergentagent.com"):
+    def __init__(self, base_url="https://a9a5040a-b5b8-47b4-b55d-ccaa9e0fb8da.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
