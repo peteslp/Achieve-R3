@@ -109,9 +109,9 @@ const getProgressColor = (level) => {
 };
 
 const getTrendIcon = (trend) => {
-  if (trend === 'improving') return <TrendingUp className="w-4 h-4 text-green-600" />;
+  if (trend === 'improving') return <TrendingUp className="w-4 h-4 text-emerald-600" />;
   if (trend === 'declining') return <TrendingUp className="w-4 h-4 text-red-600 rotate-180" />;
-  return <Target className="w-4 h-4 text-gray-600" />;
+  return <Target className="w-4 h-4 text-slate-600" />;
 };
 
 const StudentCard = ({ student, onSelect, isSelected }) => {
