@@ -1305,3 +1305,496 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
     </DndProvider>
   );
 };
+
+// Caseload Component
+export const Caseload = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState('caseload');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const handleTabChange = (tab) => {
+    setCurrentTab(tab);
+    switch(tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
+      case 'schedule':
+        navigate('/schedule');
+        break;
+      default:
+        navigate('/caseload');
+    }
+  };
+
+  const filteredStudents = mockStudents.filter(student => {
+    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         student.grade.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || student.status.toLowerCase() === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navigation 
+        currentTab={currentTab} 
+        onTabChange={handleTabChange} 
+        onLogout={onLogout}
+        currentUser={currentUser}
+      />
+      
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">My Caseload</h1>
+            <p className="text-slate-600">Manage all students in your caseload</p>
+          </div>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
+            <Plus className="h-4 w-4" />
+            <span>Add Student</span>
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-slate-200">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search students..."
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-slate-400" />
+              <select 
+                className="border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All Students</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Students Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredStudents.map(student => (
+            <div key={student.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer"
+                 onClick={() => navigate(`/student/${student.id}`)}>
+              <div className="flex items-center space-x-4 mb-4">
+                <img src={student.avatar} alt={student.name} className="w-12 h-12 rounded-full object-cover" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-900">{student.name}</h3>
+                  <p className="text-slate-600 text-sm">{student.grade} • Age {student.age}</p>
+                </div>
+                <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", getProgressColor(student.progressLevel))}>
+                  {student.progressLevel}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 mb-1">Primary Goals</p>
+                  <div className="space-y-1">
+                    {student.primaryGoals.slice(0, 2).map((goal, index) => (
+                      <p key={index} className="text-sm text-slate-600">• {goal}</p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+                  <div className="text-sm">
+                    <p className="text-slate-500">Next Session</p>
+                    <p className="font-medium text-slate-900">
+                      {format(new Date(student.nextSession), 'MMM dd, h:mm a')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-slate-500">Progress</p>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm font-medium">{student.recentProgress.score}%</span>
+                      <TrendingUp className={clsx("h-3 w-3", 
+                        student.recentProgress.trend === 'up' ? 'text-green-500' : 'text-slate-400')} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredStudents.length === 0 && (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 mb-2">No students found</h3>
+            <p className="text-slate-600">Try adjusting your search or filters</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Schedule Component (Calendar View)
+export const Schedule = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState('schedule');
+  const [viewType, setViewType] = useState('week');
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const handleTabChange = (tab) => {
+    setCurrentTab(tab);
+    switch(tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
+      case 'caseload':
+        navigate('/caseload');
+        break;
+      default:
+        navigate('/schedule');
+    }
+  };
+
+  const navigateDate = (direction) => {
+    const newDate = new Date(currentDate);
+    if (viewType === 'day') {
+      newDate.setDate(currentDate.getDate() + direction);
+    } else if (viewType === 'week') {
+      newDate.setDate(currentDate.getDate() + (direction * 7));
+    } else {
+      newDate.setMonth(currentDate.getMonth() + direction);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const getViewDates = () => {
+    if (viewType === 'day') {
+      return [currentDate];
+    } else if (viewType === 'week') {
+      const start = startOfWeek(currentDate);
+      const end = endOfWeek(currentDate);
+      return eachDayOfInterval({ start, end });
+    } else {
+      const start = startOfMonth(currentDate);
+      const end = endOfMonth(currentDate);
+      return eachDayOfInterval({ start, end });
+    }
+  };
+
+  const getSessionsForDate = (date) => {
+    const individualSessions = mockSessions.filter(session => 
+      format(new Date(session.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+    );
+    
+    const groupSessions = mockGroupSessions.filter(session => 
+      format(new Date(session.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+    );
+    
+    return { individualSessions, groupSessions };
+  };
+
+  const handleSessionClick = (session) => {
+    if (session.type === 'Group' || session.studentIds) {
+      navigate(`/live-session/${session.id}`);
+    } else {
+      navigate(`/live-session/${session.id}`);
+    }
+  };
+
+  const renderSessionCard = (session, isGroupSession = false) => {
+    if (isGroupSession) {
+      const students = session.studentIds.map(id => mockStudents.find(s => s.id === id)).filter(Boolean);
+      return (
+        <div 
+          key={session.id} 
+          className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500 cursor-pointer hover:bg-purple-100 transition-colors"
+          onClick={() => handleSessionClick(session)}
+        >
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-purple-600" />
+            <span className="text-purple-600 font-medium text-sm">GROUP</span>
+          </div>
+          <div className="text-purple-600 font-medium">
+            {format(new Date(session.date), 'h:mm a')}
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-slate-900">{session.name}</p>
+            <p className="text-sm text-slate-600">{session.duration} minutes • {session.room}</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="text-xs text-slate-500">Students:</span>
+              {students.map((student, index) => (
+                <span key={student.id} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                  {student.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-medium">
+              {session.status}
+            </span>
+          </div>
+        </div>
+      );
+    } else {
+      const student = mockStudents.find(s => s.id === session.studentId);
+      return (
+        <div 
+          key={session.id} 
+          className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 cursor-pointer hover:bg-blue-100 transition-colors"
+          onClick={() => handleSessionClick(session)}
+        >
+          <div className="text-blue-600 font-medium">
+            {format(new Date(session.date), 'h:mm a')}
+          </div>
+          <img src={student?.avatar} alt={student?.name} className="w-10 h-10 rounded-full object-cover" />
+          <div className="flex-1">
+            <p className="font-medium text-slate-900">{student?.name}</p>
+            <p className="text-sm text-slate-600">{session.type} • {session.duration} minutes</p>
+          </div>
+          <div className="text-right">
+            <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
+              {session.status}
+            </span>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const viewDates = getViewDates();
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navigation 
+        currentTab={currentTab} 
+        onTabChange={handleTabChange} 
+        onLogout={onLogout}
+        currentUser={currentUser}
+      />
+      
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Schedule</h1>
+            <p className="text-slate-600">Manage your therapy sessions</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/schedule-grid')}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-purple-700"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Grid View</span>
+            </button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
+              <Plus className="h-4 w-4" />
+              <span>New Session</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Schedule Controls */}
+        <div className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-slate-200">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => navigateDate(-1)}
+                className="p-2 hover:bg-slate-100 rounded-lg"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {viewType === 'day' && format(currentDate, 'EEEE, MMMM dd, yyyy')}
+                {viewType === 'week' && `Week of ${format(startOfWeek(currentDate), 'MMM dd, yyyy')}`}
+                {viewType === 'month' && format(currentDate, 'MMMM yyyy')}
+              </h2>
+              <button 
+                onClick={() => navigateDate(1)}
+                className="p-2 hover:bg-slate-100 rounded-lg"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              {['day', 'week', 'month'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setViewType(type)}
+                  className={clsx(
+                    "px-3 py-1 rounded-lg text-sm font-medium capitalize",
+                    viewType === type 
+                      ? "bg-blue-600 text-white" 
+                      : "text-slate-600 hover:bg-slate-100"
+                  )}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Schedule Grid */}
+        {viewType === 'day' ? (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+            <div className="p-6">
+              <h3 className="font-semibold text-slate-900 mb-4">
+                {format(currentDate, 'EEEE, MMMM dd')}
+              </h3>
+              <div className="space-y-3">
+                {(() => {
+                  const { individualSessions, groupSessions } = getSessionsForDate(currentDate);
+                  const allSessions = [
+                    ...individualSessions.map(session => ({ ...session, isGroup: false })),
+                    ...groupSessions.map(session => ({ ...session, isGroup: true }))
+                  ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                  if (allSessions.length === 0) {
+                    return <p className="text-slate-500 text-center py-8">No sessions scheduled for this day</p>;
+                  }
+
+                  return allSessions.map(session => 
+                    renderSessionCard(session, session.isGroup)
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        ) : viewType === 'week' ? (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="grid grid-cols-7 border-b border-slate-200">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="p-4 text-center font-medium text-slate-600 border-r border-slate-200 last:border-r-0">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {viewDates.map(date => {
+                const { individualSessions, groupSessions } = getSessionsForDate(date);
+                const allSessions = [
+                  ...individualSessions,
+                  ...groupSessions
+                ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                return (
+                  <div key={date.toISOString()} className="min-h-[120px] p-2 border-r border-slate-200 last:border-r-0">
+                    <div className={clsx(
+                      "text-sm font-medium mb-2",
+                      isToday(date) ? "text-blue-600" : "text-slate-900"
+                    )}>
+                      {format(date, 'd')}
+                    </div>
+                    <div className="space-y-1">
+                      {allSessions.slice(0, 3).map(session => {
+                        const isGroup = session.studentIds !== undefined;
+                        if (isGroup) {
+                          return (
+                            <div 
+                              key={session.id} 
+                              className="text-xs p-1 bg-purple-100 text-purple-700 rounded truncate cursor-pointer hover:bg-purple-200"
+                              onClick={() => handleSessionClick(session)}
+                            >
+                              {format(new Date(session.date), 'h:mm a')} {session.name}
+                            </div>
+                          );
+                        } else {
+                          const student = mockStudents.find(s => s.id === session.studentId);
+                          return (
+                            <div 
+                              key={session.id} 
+                              className="text-xs p-1 bg-blue-100 text-blue-700 rounded truncate cursor-pointer hover:bg-blue-200"
+                              onClick={() => handleSessionClick(session)}
+                            >
+                              {format(new Date(session.date), 'h:mm a')} {student?.name}
+                            </div>
+                          );
+                        }
+                      })}
+                      {allSessions.length > 3 && (
+                        <div className="text-xs text-slate-500">
+                          +{allSessions.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="grid grid-cols-7 border-b border-slate-200">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="p-4 text-center font-medium text-slate-600 border-r border-slate-200 last:border-r-0">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {viewDates.map(date => {
+                const { individualSessions, groupSessions } = getSessionsForDate(date);
+                const allSessions = [
+                  ...individualSessions,
+                  ...groupSessions
+                ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                return (
+                  <div key={date.toISOString()} className={clsx(
+                    "min-h-[100px] p-2 border-r border-b border-slate-200 last:border-r-0",
+                    !isSameMonth(date, currentDate) && "bg-slate-50"
+                  )}>
+                    <div className={clsx(
+                      "text-sm font-medium mb-1",
+                      isToday(date) ? "text-blue-600" : 
+                      isSameMonth(date, currentDate) ? "text-slate-900" : "text-slate-400"
+                    )}>
+                      {format(date, 'd')}
+                    </div>
+                    <div className="space-y-1">
+                      {allSessions.slice(0, 2).map(session => {
+                        const isGroup = session.studentIds !== undefined;
+                        return (
+                          <div 
+                            key={session.id} 
+                            className={clsx(
+                              "text-xs p-1 rounded truncate cursor-pointer",
+                              isGroup 
+                                ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
+                                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            )}
+                            onClick={() => handleSessionClick(session)}
+                          >
+                            {format(new Date(session.date), 'h:mm a')}
+                            {isGroup ? ` (Group)` : ''}
+                          </div>
+                        );
+                      })}
+                      {allSessions.length > 2 && (
+                        <div className="text-xs text-slate-500">
+                          +{allSessions.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
