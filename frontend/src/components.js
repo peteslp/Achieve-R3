@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { 
@@ -11,6 +11,262 @@ import {
 } from 'lucide-react';
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth } from 'date-fns';
 import clsx from 'clsx';
+
+// Helper functions for dates and colors
+const getCurrentWeekDates = () => {
+  const today = new Date();
+  const currentWeek = [];
+  const startOfCurrentWeek = new Date(today);
+  startOfCurrentWeek.setDate(today.getDate() - today.getDay());
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfCurrentWeek);
+    date.setDate(startOfCurrentWeek.getDate() + i);
+    currentWeek.push(date);
+  }
+  return currentWeek;
+};
+
+const formatDateForSessions = (date) => {
+  return date.toISOString();
+};
+
+const getProgressColor = (level) => {
+  switch(level) {
+    case 'Excellent': return 'text-green-600 bg-green-100';
+    case 'Progressing': return 'text-blue-600 bg-blue-100';
+    case 'Needs Support': return 'text-orange-600 bg-orange-100';
+    default: return 'text-slate-600 bg-slate-100';
+  }
+};
+
+const currentWeekDates = getCurrentWeekDates();
+
+// Mock Data
+const mockStudents = [
+  {
+    id: 1,
+    name: "Emma Rodriguez",
+    age: 8,
+    grade: "3rd Grade", 
+    avatar: "https://images.pexels.com/photos/6147369/pexels-photo-6147369.jpeg",
+    status: "Active",
+    primaryGoals: ["Articulation - /R/ sound production", "Language comprehension"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(10, 0, 0)),
+    iepDue: "2025-02-15",
+    evaluationDue: null,
+    progressLevel: "Progressing",
+    therapyType: "Individual",
+    servicesPerWeek: 3,
+    sessionLength: "30 min",
+    accommodations: ["Extended time", "Visual supports", "Preferential seating"],
+    recentProgress: { score: 78, trend: "up" }
+  },
+  {
+    id: 2,
+    name: "Marcus Johnson",
+    age: 6,
+    grade: "1st Grade",
+    avatar: "https://images.pexels.com/photos/5212695/pexels-photo-5212695.jpeg",
+    status: "Active",
+    primaryGoals: ["Fluency improvement", "Social communication"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(10, 30, 0)),
+    iepDue: null,
+    evaluationDue: "2025-01-20",
+    progressLevel: "Excellent",
+    therapyType: "Group",
+    servicesPerWeek: 2,
+    sessionLength: "45 min",
+    accommodations: ["Calm down breaks", "Peer support"],
+    recentProgress: { score: 92, trend: "up" }
+  },
+  {
+    id: 3,
+    name: "Aisha Patel",
+    age: 10,
+    grade: "5th Grade",
+    avatar: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846",
+    status: "Active",
+    primaryGoals: ["Voice quality", "Pragmatic language skills"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(9, 0, 0)),
+    iepDue: "2025-01-25",
+    evaluationDue: null,
+    progressLevel: "Needs Support",
+    therapyType: "Individual",
+    servicesPerWeek: 4,
+    sessionLength: "30 min",
+    accommodations: ["Assistive technology", "Communication board"],
+    recentProgress: { score: 65, trend: "stable" }
+  },
+  {
+    id: 4,
+    name: "Dylan Chen",
+    age: 7,
+    grade: "2nd Grade",
+    avatar: "https://images.pexels.com/photos/8298453/pexels-photo-8298453.jpeg",
+    status: "Active",
+    primaryGoals: ["Phonological awareness", "Vocabulary expansion"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(14, 0, 0)),
+    iepDue: null,
+    evaluationDue: "2025-02-01",
+    progressLevel: "Progressing",
+    therapyType: "Individual",
+    servicesPerWeek: 2,
+    sessionLength: "30 min",
+    accommodations: ["Visual schedule", "Reduced auditory distractions"],
+    recentProgress: { score: 74, trend: "up" }
+  },
+  {
+    id: 5,
+    name: "Sofia Martinez",
+    age: 9,
+    grade: "4th Grade",
+    avatar: "https://images.pexels.com/photos/7402835/pexels-photo-7402835.jpeg",
+    status: "Active",
+    primaryGoals: ["Language structure", "Reading comprehension"],
+    nextSession: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(11, 0, 0)),
+    iepDue: "2025-03-10",
+    evaluationDue: null,
+    progressLevel: "Excellent",
+    therapyType: "Group",
+    servicesPerWeek: 3,
+    sessionLength: "45 min",
+    accommodations: ["Text-to-speech", "Modified assignments"],
+    recentProgress: { score: 88, trend: "up" }
+  }
+];
+
+const mockSessions = [
+  {
+    id: 1,
+    studentId: 1,
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(10, 0, 0)),
+    duration: 30,
+    type: "Individual",
+    goals: ["Articulation practice", "Homework review"],
+    status: "Scheduled"
+  },
+  {
+    id: 2,
+    studentId: 3,
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(9, 0, 0)),
+    duration: 30,
+    type: "Individual", 
+    goals: ["Voice exercises", "Communication practice"],
+    status: "Scheduled"
+  },
+  {
+    id: 3,
+    studentId: 4,
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(14, 0, 0)),
+    duration: 30,
+    type: "Individual",
+    goals: ["Phonics work", "Vocabulary building"],
+    status: "Scheduled"
+  },
+  {
+    id: 4,
+    studentId: 1,
+    date: formatDateForSessions(new Date(currentWeekDates[3].getTime()).setHours(9, 0, 0)),
+    duration: 30,
+    type: "Individual",
+    goals: ["Articulation - /R/ sound practice"],
+    status: "Scheduled"
+  },
+  {
+    id: 5,
+    studentId: 5,
+    date: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(11, 0, 0)),
+    duration: 30,
+    type: "Individual",
+    goals: ["Reading comprehension", "Language structure"],
+    status: "Scheduled"
+  },
+  {
+    id: 6,
+    studentId: 2,
+    date: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(10, 30, 0)),
+    duration: 30,
+    type: "Individual",
+    goals: ["Fluency techniques", "Confidence building"],
+    status: "Scheduled"
+  }
+];
+
+const mockGroupSessions = [
+  {
+    id: 'group-1',
+    name: "Social Communication Group",
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(13, 0, 0)),
+    duration: 45,
+    type: "Group",
+    studentIds: [2, 5],
+    goals: ["Social interaction", "Turn-taking", "Conversation skills"],
+    status: "Scheduled",
+    description: "Focus on peer interaction and social communication skills",
+    room: "Therapy Room A"
+  },
+  {
+    id: 'group-2',
+    name: "Articulation Practice Group",
+    date: formatDateForSessions(new Date(currentWeekDates[2].getTime()).setHours(15, 30, 0)),
+    duration: 60,
+    type: "Group",
+    studentIds: [1, 4],
+    goals: ["Sound production", "Phonological awareness", "Peer modeling"],
+    status: "Scheduled",
+    description: "Group practice for /R/ and /S/ sound production",
+    room: "Therapy Room B"
+  },
+  {
+    id: 'group-3',
+    name: "Language Enrichment Group",
+    date: formatDateForSessions(new Date(currentWeekDates[3].getTime()).setHours(14, 0, 0)),
+    duration: 50,
+    type: "Group",
+    studentIds: [3, 5, 2],
+    goals: ["Vocabulary expansion", "Grammar practice", "Narrative skills"],
+    status: "Scheduled",
+    description: "Advanced language skills for upper elementary students",
+    room: "Therapy Room C"
+  },
+  {
+    id: 'group-4',
+    name: "Fluency Support Group",
+    date: formatDateForSessions(new Date(currentWeekDates[4].getTime()).setHours(10, 0, 0)),
+    duration: 45,
+    type: "Group",
+    studentIds: [2, 4],
+    goals: ["Fluency techniques", "Confidence building", "Breathing exercises"],
+    status: "Scheduled",
+    description: "Supportive environment for fluency practice",
+    room: "Therapy Room A"
+  },
+  {
+    id: 'group-5',
+    name: "Reading Readiness Group",
+    date: formatDateForSessions(new Date(currentWeekDates[5].getTime()).setHours(9, 30, 0)),
+    duration: 40,
+    type: "Group",
+    studentIds: [1, 4, 3],
+    goals: ["Pre-reading skills", "Phonemic awareness", "Letter-sound correspondence"],
+    status: "Scheduled",
+    description: "Foundation skills for reading success",
+    room: "Therapy Room B"
+  },
+  {
+    id: 'group-6',
+    name: "Peer Communication Circle",
+    date: formatDateForSessions(new Date(currentWeekDates[1].getTime()).setHours(11, 30, 0)),
+    duration: 45,
+    type: "Group",
+    studentIds: [2, 3, 5],
+    goals: ["Peer interaction", "Problem solving", "Social pragmatics"],
+    status: "Scheduled",
+    description: "Interactive group for social communication development",
+    room: "Therapy Room C"
+  }
+];
 
 // Item types for drag and drop
 const ItemTypes = {
