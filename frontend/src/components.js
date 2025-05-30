@@ -2243,3 +2243,501 @@ export const StudentDetail = ({ currentUser, onLogout }) => {
     </div>
   );
 };
+
+// ScheduleGrid Component - Bird's Eye View with Drag & Drop
+export const ScheduleGrid = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState('schedule');
+  const [selectedWeek, setSelectedWeek] = useState(new Date());
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [scheduleData, setScheduleData] = useState(() => {
+    // Initialize schedule data structure
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const timeSlots = [
+      '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '1:00', '2:00', '3:00'
+    ];
+    
+    const initialData = {};
+    days.forEach(day => {
+      initialData[day] = {};
+      timeSlots.forEach(time => {
+        initialData[day][time] = [];
+      });
+    });
+
+    // Populate with existing sessions and groups
+    const sessions = [
+      // Individual Sessions
+      { id: 'ind-1', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Monday', time: '10:00', duration: 30 },
+      { id: 'ind-2', student: 'Aisha Patel', type: 'individual', color: 'bg-green-200 border-green-400', day: 'Tuesday', time: '9:00', duration: 30 },
+      { id: 'ind-3', student: 'Dylan Chen', type: 'individual', color: 'bg-yellow-200 border-yellow-400', day: 'Tuesday', time: '2:00', duration: 30 },
+      { id: 'ind-4', student: 'Emma Rodriguez', type: 'individual', color: 'bg-blue-200 border-blue-400', day: 'Wednesday', time: '9:00', duration: 30 },
+      { id: 'ind-5', student: 'Sofia Martinez', type: 'individual', color: 'bg-purple-200 border-purple-400', day: 'Thursday', time: '11:00', duration: 30 },
+      { id: 'ind-6', student: 'Marcus Johnson', type: 'individual', color: 'bg-red-200 border-red-400', day: 'Friday', time: '10:00', duration: 30 },
+
+      // Group Sessions
+      { 
+        id: 'group-1', 
+        name: 'Social Communication Group',
+        students: ['Marcus Johnson', 'Sofia Martinez'], 
+        type: 'group', 
+        color: 'bg-pink-200 border-pink-400', 
+        day: 'Monday', 
+        time: '1:00', 
+        duration: 45 
+      },
+      { 
+        id: 'group-2', 
+        name: 'Articulation Practice',
+        students: ['Emma Rodriguez', 'Dylan Chen'], 
+        type: 'group', 
+        color: 'bg-cyan-200 border-cyan-400', 
+        day: 'Tuesday', 
+        time: '3:00', 
+        duration: 60 
+      },
+      { 
+        id: 'group-3', 
+        name: 'Language Enrichment',
+        students: ['Aisha Patel', 'Sofia Martinez', 'Marcus Johnson'], 
+        type: 'group', 
+        color: 'bg-orange-200 border-orange-400', 
+        day: 'Wednesday', 
+        time: '2:00', 
+        duration: 50 
+      },
+      { 
+        id: 'group-4', 
+        name: 'Fluency Support',
+        students: ['Marcus Johnson', 'Dylan Chen'], 
+        type: 'group', 
+        color: 'bg-teal-200 border-teal-400', 
+        day: 'Thursday', 
+        time: '10:00', 
+        duration: 45 
+      },
+      { 
+        id: 'group-5', 
+        name: 'Reading Readiness',
+        students: ['Emma Rodriguez', 'Dylan Chen', 'Aisha Patel'], 
+        type: 'group', 
+        color: 'bg-indigo-200 border-indigo-400', 
+        day: 'Friday', 
+        time: '9:00', 
+        duration: 40 
+      }
+    ];
+
+    // Place sessions in the grid
+    sessions.forEach(session => {
+      if (initialData[session.day] && initialData[session.day][session.time]) {
+        initialData[session.day][session.time].push(session);
+      }
+    });
+
+    return initialData;
+  });
+
+  const [availableStudents] = useState([
+    { id: 1, name: 'Emma Rodriguez', color: 'bg-blue-200 border-blue-400' },
+    { id: 2, name: 'Marcus Johnson', color: 'bg-red-200 border-red-400' },
+    { id: 3, name: 'Aisha Patel', color: 'bg-green-200 border-green-400' },
+    { id: 4, name: 'Dylan Chen', color: 'bg-yellow-200 border-yellow-400' },
+    { id: 5, name: 'Sofia Martinez', color: 'bg-purple-200 border-purple-400' }
+  ]);
+
+  const handleTabChange = (tab) => {
+    setCurrentTab(tab);
+    switch(tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
+      case 'caseload':
+        navigate('/caseload');
+        break;
+      default:
+        navigate('/schedule');
+    }
+  };
+
+  const handleDragStart = (e, item, sourceDay, sourceTime) => {
+    setDraggedItem({ item, sourceDay, sourceTime });
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, targetDay, targetTime) => {
+    e.preventDefault();
+    
+    if (!draggedItem) return;
+
+    const { item, sourceDay, sourceTime } = draggedItem;
+
+    // Don't do anything if dropped in the same place
+    if (sourceDay === targetDay && sourceTime === targetTime) {
+      setDraggedItem(null);
+      return;
+    }
+
+    setScheduleData(prev => {
+      const newData = { ...prev };
+      
+      // Remove from source
+      newData[sourceDay][sourceTime] = newData[sourceDay][sourceTime].filter(s => s.id !== item.id);
+      
+      // Add to target
+      const updatedItem = { ...item, day: targetDay, time: targetTime };
+      newData[targetDay][targetTime] = [...newData[targetDay][targetTime], updatedItem];
+      
+      return newData;
+    });
+
+    setDraggedItem(null);
+  };
+
+  const handleNewStudentDrop = (e, targetDay, targetTime) => {
+    e.preventDefault();
+    
+    const studentData = e.dataTransfer.getData('text/plain');
+    if (!studentData) return;
+
+    try {
+      const student = JSON.parse(studentData);
+      
+      const newSession = {
+        id: `new-${Date.now()}`,
+        student: student.name,
+        type: 'individual',
+        color: student.color,
+        day: targetDay,
+        time: targetTime,
+        duration: 30
+      };
+
+      setScheduleData(prev => ({
+        ...prev,
+        [targetDay]: {
+          ...prev[targetDay],
+          [targetTime]: [...prev[targetDay][targetTime], newSession]
+        }
+      }));
+    } catch (error) {
+      console.error('Error dropping student:', error);
+    }
+  };
+
+  const addStudentToGroup = (groupId, studentName) => {
+    setScheduleData(prev => {
+      const newData = { ...prev };
+      
+      // Find the group and add the student
+      Object.keys(newData).forEach(day => {
+        Object.keys(newData[day]).forEach(time => {
+          newData[day][time] = newData[day][time].map(session => {
+            if (session.id === groupId && session.type === 'group') {
+              return {
+                ...session,
+                students: [...session.students, studentName]
+              };
+            }
+            return session;
+          });
+        });
+      });
+      
+      return newData;
+    });
+  };
+
+  const removeStudentFromGroup = (groupId, studentName) => {
+    setScheduleData(prev => {
+      const newData = { ...prev };
+      
+      // Find the group and remove the student
+      Object.keys(newData).forEach(day => {
+        Object.keys(newData[day]).forEach(time => {
+          newData[day][time] = newData[day][time].map(session => {
+            if (session.id === groupId && session.type === 'group') {
+              return {
+                ...session,
+                students: session.students.filter(s => s !== studentName)
+              };
+            }
+            return session;
+          });
+        });
+      });
+      
+      return newData;
+    });
+  };
+
+  const createNewGroup = (day, time) => {
+    const newGroup = {
+      id: `group-new-${Date.now()}`,
+      name: 'New Group',
+      students: [],
+      type: 'group',
+      color: 'bg-gray-200 border-gray-400',
+      day,
+      time,
+      duration: 45
+    };
+
+    setScheduleData(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [time]: [...prev[day][time], newGroup]
+      }
+    }));
+  };
+
+  const deleteSession = (sessionId, day, time) => {
+    setScheduleData(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [time]: prev[day][time].filter(s => s.id !== sessionId)
+      }
+    }));
+  };
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const timeSlots = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '1:00', '2:00', '3:00'];
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navigation 
+        currentTab={currentTab} 
+        onTabChange={handleTabChange} 
+        onLogout={onLogout}
+        currentUser={currentUser}
+      />
+      
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Schedule Grid</h1>
+            <p className="text-slate-600">Drag and drop to manage your weekly schedule</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/schedule')}
+              className="bg-slate-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-700"
+            >
+              <Calendar className="h-4 w-4" />
+              <span>Calendar View</span>
+            </button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
+              <Plus className="h-4 w-4" />
+              <span>New Session</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Student Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 sticky top-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Students</h3>
+              <p className="text-sm text-slate-600 mb-4">Drag students to schedule slots</p>
+              
+              <div className="space-y-3">
+                {availableStudents.map(student => (
+                  <div
+                    key={student.id}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', JSON.stringify(student));
+                    }}
+                    className={clsx(
+                      "p-3 rounded-lg border-2 border-dashed cursor-move hover:shadow-md transition-shadow",
+                      student.color
+                    )}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
+                      <span className="font-medium text-slate-900">{student.name}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                <h4 className="font-medium text-slate-900 mb-2">Actions</h4>
+                <div className="space-y-2">
+                  <button className="w-full bg-green-600 text-white py-2 px-3 rounded-lg text-sm hover:bg-green-700">
+                    Create Group
+                  </button>
+                  <button className="w-full bg-blue-600 text-white py-2 px-3 rounded-lg text-sm hover:bg-blue-700">
+                    Add Time Slot
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Schedule Grid */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              {/* Week Header */}
+              <div className="bg-slate-50 p-4 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-slate-900">
+                    Week of {format(startOfWeek(selectedWeek), 'MMM dd, yyyy')}
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={() => setSelectedWeek(addDays(selectedWeek, -7))}
+                      className="p-2 hover:bg-slate-200 rounded-lg"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => setSelectedWeek(addDays(selectedWeek, 7))}
+                      className="p-2 hover:bg-slate-200 rounded-lg"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid Header */}
+              <div className="grid grid-cols-6 border-b border-slate-200">
+                <div className="p-3 bg-slate-50 font-medium text-slate-600 text-sm">Time</div>
+                {days.map(day => (
+                  <div key={day} className="p-3 bg-slate-50 font-medium text-slate-600 text-sm border-l border-slate-200">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Grid Body */}
+              <div className="max-h-[600px] overflow-y-auto">
+                {timeSlots.map(time => (
+                  <div key={time} className="grid grid-cols-6 border-b border-slate-200 min-h-[80px]">
+                    {/* Time Column */}
+                    <div className="p-3 bg-slate-50 border-r border-slate-200 flex items-center">
+                      <span className="font-medium text-slate-900">{time}</span>
+                    </div>
+
+                    {/* Day Columns */}
+                    {days.map(day => (
+                      <div
+                        key={`${day}-${time}`}
+                        className="p-2 border-l border-slate-200 min-h-[80px]"
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => {
+                          handleDrop(e, day, time);
+                          handleNewStudentDrop(e, day, time);
+                        }}
+                      >
+                        <div className="space-y-1">
+                          {scheduleData[day][time].map(session => (
+                            <div
+                              key={session.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, session, day, time)}
+                              className={clsx(
+                                "p-2 rounded border-2 cursor-move hover:shadow-md transition-shadow relative group",
+                                session.color
+                              )}
+                            >
+                              {session.type === 'individual' ? (
+                                <div>
+                                  <div className="font-medium text-xs">{session.student}</div>
+                                  <div className="text-xs text-slate-600">{session.duration}min</div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="font-medium text-xs mb-1">{session.name}</div>
+                                  <div className="text-xs text-slate-600 mb-1">{session.duration}min</div>
+                                  <div className="space-y-1">
+                                    {session.students.map((student, idx) => (
+                                      <div key={idx} className="text-xs bg-white/50 px-1 rounded flex items-center justify-between">
+                                        <span>{student}</span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeStudentFromGroup(session.id, student);
+                                          }}
+                                          className="text-red-500 hover:text-red-700 ml-1"
+                                        >
+                                          ×
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Delete button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteSession(session.id, day, time);
+                                }}
+                                className="absolute top-1 right-1 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <AlertCircle className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Empty slot indicator */}
+                        {scheduleData[day][time].length === 0 && (
+                          <div className="h-full flex items-center justify-center">
+                            <button
+                              onClick={() => createNewGroup(day, time)}
+                              className="text-slate-400 hover:text-slate-600 text-xs"
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="mt-4 bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+              <h4 className="font-medium text-slate-900 mb-3">Legend</h4>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-blue-200 border border-blue-400 rounded"></div>
+                  <span className="text-sm text-slate-600">Individual Session</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-pink-200 border border-pink-400 rounded"></div>
+                  <span className="text-sm text-slate-600">Group Session</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded border-dashed"></div>
+                  <span className="text-sm text-slate-600">Available Slot</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-yellow-200 border border-yellow-400 rounded"></div>
+                  <span className="text-sm text-slate-600">Assessment</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-red-200 border border-red-400 rounded"></div>
+                  <span className="text-sm text-slate-600">Blocked Time</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
