@@ -373,7 +373,7 @@ const DashboardContent = () => {
             <span className="text-sm text-slate-500">{upcomingEvaluations.length} scheduled</span>
           </div>
           <div className="space-y-3">
-            {upcomingEvaluations.map((eval, index) => (
+            {upcomingEvaluations.map((evaluation, index) => (
               <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
