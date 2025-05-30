@@ -992,13 +992,8 @@ const SessionModal = ({ session, isOpen, onClose, onSave, onDelete }) => {
   );
 };
 
-// Main Schedule Component
-const Schedule = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [sessions, setSessions] = useState(mockSessions);
-  const [selectedSession, setSelectedSession] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [view, setView] = useState('weekly'); // daily, weekly, monthly
+// Live Scheduler Component with Drag & Drop
+const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
   const [draggedStudent, setDraggedStudent] = useState(null);
   const [draggedSession, setDraggedSession] = useState(null);
   const [dropZone, setDropZone] = useState(null);
