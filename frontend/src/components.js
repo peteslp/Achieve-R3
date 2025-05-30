@@ -1133,7 +1133,7 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-slate-50">
-        <SimpleNavigation currentUser={currentUser} onLogout={onLogout} />
+        <Navigation currentUser={currentUser} onLogout={onLogout} />
         
         <div className="p-6">
           {/* Header */}
@@ -1143,6 +1143,13 @@ export const ScheduleGrid = ({ currentUser, onLogout }) => {
               <p className="text-slate-600">Drag and drop to manage your weekly schedule (5-minute precision)</p>
             </div>
             <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => navigate('/schedule')}
+                className="bg-slate-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-700"
+              >
+                <Calendar className="h-4 w-4" />
+                <span>Calendar View</span>
+              </button>
               <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
                 <Plus className="h-4 w-4" />
                 <span>New Session</span>
