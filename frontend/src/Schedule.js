@@ -992,8 +992,8 @@ const SessionModal = ({ session, isOpen, onClose, onSave, onDelete }) => {
   );
 };
 
-// Live Scheduler Component with Drag & Drop
-const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
+// Main Schedule Component
+const Schedule = () => {
   const [draggedStudent, setDraggedStudent] = useState(null);
   const [draggedSession, setDraggedSession] = useState(null);
   const [dropZone, setDropZone] = useState(null);
