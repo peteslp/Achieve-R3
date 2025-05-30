@@ -377,7 +377,76 @@ const getStudentColor = (color) => {
   return colors[color] || 'bg-slate-500';
 };
 
-// Live Scheduler Component with Drag & Drop - COMPLETE
+// Session Card Component - COMPLETE
+const SessionCard = ({ session, onClick, isCompact = false }) => {
+  const isGroup = session.type === 'Group';
+  const studentColors = isGroup ? session.studentIds?.map(id => {
+    const student = students.find(s => s.id === id);
+    return student ? getStudentColor(student.color) : 'bg-slate-500';
+  }) : [];
+  
+  return (
+    <div 
+      className={`bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer ${
+        isCompact ? 'p-2' : 'p-3'
+      }`}
+      onClick={() => onClick(session)}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center space-x-2 flex-1">
+          {isGroup ? (
+            <div className="flex -space-x-1">
+              {studentColors.slice(0, 3).map((color, index) => (
+                <div key={index} className={`w-3 h-3 rounded-full border border-white ${color}`}></div>
+              ))}
+              {studentColors.length > 3 && (
+                <div className="w-3 h-3 rounded-full bg-slate-300 border border-white flex items-center justify-center">
+                  <span className="text-xs text-slate-600">+</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={`w-3 h-3 rounded-full ${
+              session.studentIds?.[0] ? 
+                getStudentColor(students.find(s => s.id === session.studentIds[0])?.color) : 
+                'bg-slate-500'
+            }`}></div>
+          )}
+          <h4 className={`font-medium text-slate-800 ${isCompact ? 'text-xs' : 'text-sm'} truncate`}>
+            {session.student}
+          </h4>
+        </div>
+        {!isCompact && (
+          <span className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(session.status)}`}>
+            {session.status}
+          </span>
+        )}
+      </div>
+      
+      <div className={`space-y-1 ${isCompact ? 'text-xs' : 'text-xs'} text-slate-600`}>
+        <div className="flex items-center space-x-1">
+          <Clock className="w-3 h-3" />
+          <span>{session.time} ({session.duration}min)</span>
+        </div>
+        {!isCompact && (
+          <>
+            <div className="flex items-center space-x-1">
+              <MapPin className="w-3 h-3" />
+              <span>{session.location}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              {session.type === 'Group' ? <Users className="w-3 h-3" /> : <User className="w-3 h-3" />}
+              <span>{session.type}</span>
+              {isGroup && session.students && (
+                <span className="text-slate-500">({session.students.length})</span>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
   const [draggedStudent, setDraggedStudent] = useState(null);
   const [draggedSession, setDraggedSession] = useState(null);
