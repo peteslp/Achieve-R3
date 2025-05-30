@@ -601,30 +601,279 @@ const DropZone = ({ day, time, sessions, onDrop, onDelete, onRemoveStudentFromGr
   );
 };
 
-// Simple Navigation Component for the grid
-const SimpleNavigation = ({ currentUser, onLogout }) => {
+// Navigation Component
+const Navigation = ({ currentTab, onTabChange, onLogout, currentUser }) => {
+  const tabs = [
+    { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/' },
+    { id: 'caseload', name: 'Caseload', icon: Users, path: '/caseload' },
+    { id: 'schedule', name: 'Schedule', icon: Calendar, path: '/schedule' }
+  ];
+
   return (
     <nav className="bg-slate-900 text-white h-16 flex items-center justify-between px-6 shadow-lg">
-      <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <Brain className="h-5 w-5 text-white" />
+      <div className="flex items-center space-x-8">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <Brain className="h-5 w-5 text-white" />
+          </div>
+          <h1 className="text-xl font-bold text-white">Achieve</h1>
         </div>
-        <h1 className="text-xl font-bold text-white">Achieve - Schedule Grid</h1>
+        
+        <div className="flex space-x-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={clsx(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors",
+                currentTab === tab.id
+                  ? "bg-slate-700 text-white"
+                  : "text-slate-300 hover:text-white hover:bg-slate-800"
+              )}
+            >
+              <tab.icon className="h-4 w-4" />
+              <span>{tab.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <div className="text-sm font-medium text-white">{currentUser?.name}</div>
-          <div className="text-xs text-slate-400">Speech Therapist</div>
-        </div>
-        <button 
-          onClick={onLogout}
-          className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg"
-        >
-          <LogOut className="h-5 w-5" />
+        <button className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg">
+          <Bell className="h-5 w-5" />
         </button>
+        <button className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg">
+          <Search className="h-5 w-5" />
+        </button>
+        <div className="flex items-center space-x-3">
+          <div className="text-right">
+            <div className="text-sm font-medium text-white">{currentUser?.name}</div>
+            <div className="text-xs text-slate-400">Speech Therapist</div>
+          </div>
+          <button 
+            onClick={onLogout}
+            className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </nav>
+  );
+};
+
+// Dashboard Component
+export const Dashboard = ({ currentUser, onLogout }) => {
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState('dashboard');
+
+  const upcomingIEPs = mockStudents.filter(student => 
+    student.iepDue && new Date(student.iepDue) <= addDays(new Date(), 30)
+  );
+
+  const upcomingEvaluations = mockStudents.filter(student => 
+    student.evaluationDue && new Date(student.evaluationDue) <= addDays(new Date(), 30)
+  );
+
+  const todaySessions = mockSessions.filter(session =>
+    format(new Date(session.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  );
+
+  const todayGroupSessions = mockGroupSessions.filter(session =>
+    format(new Date(session.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  );
+
+  const handleTabChange = (tab) => {
+    setCurrentTab(tab);
+    switch(tab) {
+      case 'caseload':
+        navigate('/caseload');
+        break;
+      case 'schedule':
+        navigate('/schedule');
+        break;
+      default:
+        navigate('/');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navigation 
+        currentTab={currentTab} 
+        onTabChange={handleTabChange} 
+        onLogout={onLogout}
+        currentUser={currentUser}
+      />
+      
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome back, {currentUser?.name}</h1>
+          <p className="text-slate-600">Here's what's happening with your caseload today</p>
+        </div>
+
+        {/* AI Insights Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 mb-6 text-white">
+          <div className="flex items-center space-x-3 mb-4">
+            <Zap className="h-6 w-6" />
+            <h2 className="text-xl font-semibold">AI Insights</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="text-sm opacity-90">This Week's Focus</div>
+              <div className="font-semibold">3 students showing rapid progress in articulation goals</div>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="text-sm opacity-90">Scheduling Optimization</div>
+              <div className="font-semibold">Consider grouping Emma and Sofia for social skills practice</div>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="text-sm opacity-90">Data Pattern</div>
+              <div className="font-semibold">Morning sessions show 23% better engagement</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-600 text-sm">Total Students</p>
+                <p className="text-2xl font-bold text-slate-900">{mockStudents.length}</p>
+              </div>
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-600 text-sm">Today's Sessions</p>
+                <p className="text-2xl font-bold text-slate-900">{todaySessions.length + todayGroupSessions.length}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-600 text-sm">Upcoming IEPs</p>
+                <p className="text-2xl font-bold text-slate-900">{upcomingIEPs.length}</p>
+              </div>
+              <FileText className="h-8 w-8 text-orange-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-600 text-sm">Evaluations Due</p>
+                <p className="text-2xl font-bold text-slate-900">{upcomingEvaluations.length}</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Upcoming IEPs */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Upcoming IEPs</h3>
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+            </div>
+            
+            {upcomingIEPs.length === 0 ? (
+              <p className="text-slate-500 text-center py-4">No upcoming IEPs</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingIEPs.map(student => (
+                  <div key={student.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover" />
+                      <div>
+                        <p className="font-medium text-slate-900">{student.name}</p>
+                        <p className="text-sm text-slate-600">Grade {student.grade}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-orange-600">
+                        Due {format(new Date(student.iepDue), 'MMM dd')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Today's Sessions */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Today's Sessions</h3>
+              <Clock className="h-5 w-5 text-blue-500" />
+            </div>
+            
+            {todaySessions.length === 0 && todayGroupSessions.length === 0 ? (
+              <p className="text-slate-500 text-center py-4">No sessions scheduled for today</p>
+            ) : (
+              <div className="space-y-3">
+                {/* Individual Sessions */}
+                {todaySessions.map(session => {
+                  const student = mockStudents.find(s => s.id === session.studentId);
+                  return (
+                    <div key={session.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <img src={student?.avatar} alt={student?.name} className="w-10 h-10 rounded-full object-cover" />
+                        <div>
+                          <p className="font-medium text-slate-900">{student?.name}</p>
+                          <p className="text-sm text-slate-600">{session.type} • {session.duration} min</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-blue-600">
+                          {format(new Date(session.date), 'h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Group Sessions */}
+                {todayGroupSessions.map(session => {
+                  const students = session.studentIds.map(id => mockStudents.find(s => s.id === id)).filter(Boolean);
+                  return (
+                    <div key={session.id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1">
+                          <Users className="h-5 w-5 text-purple-600" />
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">GROUP</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{session.name}</p>
+                          <div className="flex items-center space-x-1 text-sm text-slate-600">
+                            <span>{session.duration} min •</span>
+                            <span>{students.map(s => s.name).join(', ')}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-purple-600">
+                          {format(new Date(session.date), 'h:mm a')}
+                        </p>
+                        <p className="text-xs text-slate-500">{session.room}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
