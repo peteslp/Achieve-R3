@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { Dashboard, Caseload, Schedule, StudentDetail, Login, LiveSession, ScheduleGrid } from './components';
+import { Dashboard, Schedule, Login, ScheduleGrid } from './components';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,21 +17,19 @@ function App() {
     setCurrentUser(null);
   };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
     <div className="App">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Dashboard currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/caseload" element={<Caseload currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/schedule" element={<Schedule currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/schedule-grid" element={<ScheduleGrid currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/student/:id" element={<StudentDetail currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/live-session/:sessionId" element={<LiveSession currentUser={currentUser} onLogout={handleLogout} />} />
-        </Routes>
+        {!isAuthenticated ? (
+          <Login onLogin={handleLogin} />
+        ) : (
+          <Routes>
+            <Route path="/" element={<Dashboard currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/dashboard" element={<Dashboard currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/schedule" element={<Schedule currentUser={currentUser} onLogout={handleLogout} />} />
+            <Route path="/schedule-grid" element={<ScheduleGrid currentUser={currentUser} onLogout={handleLogout} />} />
+          </Routes>
+        )}
       </BrowserRouter>
     </div>
   );
