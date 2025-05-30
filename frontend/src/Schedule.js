@@ -20,7 +20,7 @@ const students = [
   { id: 12, name: "Zoe Anderson", color: "violet", age: 6, grade: "1st" }
 ];
 
-// 5-minute increment time slots
+// 5-minute increment time slots - PROPERLY IMPLEMENTED
 const timeSlots = [];
 for (let hour = 8; hour <= 15; hour++) {
   for (let minute = 0; minute < 60; minute += 5) {
@@ -99,8 +99,255 @@ const mockSessions = [
     therapist: "Dr. Sarah Johnson",
     goals: ["Social pragmatics", "Turn-taking", "Peer interaction", "Conversation skills"],
     status: "scheduled"
+  },
+  {
+    id: 6,
+    student: "David Kim",
+    studentIds: [6],
+    type: "Individual",
+    date: "2024-06-17",
+    time: "11:25",
+    duration: 30,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Motor planning", "Sound sequencing"],
+    status: "scheduled"
+  },
+  {
+    id: 7,
+    student: "Reading Support Group",
+    studentIds: [1, 11, 6, 3],
+    students: ["Emma Rodriguez", "Noah Williams", "David Kim", "Sophia Chen"],
+    type: "Group",
+    date: "2024-06-17",
+    time: "13:05",
+    duration: 30,
+    location: "Room 104",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Phoneme awareness", "Sound-letter correspondence", "Decoding"],
+    status: "scheduled"
+  },
+  {
+    id: 8,
+    student: "Early Language Group",
+    studentIds: [8, 12, 5],
+    students: ["Maya Patel", "Zoe Anderson", "Lily Wang"],
+    type: "Group",
+    date: "2024-06-17",
+    time: "13:40",
+    duration: 30,
+    location: "Room 103",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Play-based communication", "Two-word combinations", "Following directions"],
+    status: "scheduled"
+  },
+  {
+    id: 9,
+    student: "Marcus Thompson",
+    studentIds: [4],
+    type: "Individual",
+    date: "2024-06-17",
+    time: "14:15",
+    duration: 30,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Social pragmatics individual work"],
+    status: "scheduled"
+  },
+
+  // Tuesday Sessions
+  {
+    id: 10,
+    student: "Sophia Chen",
+    studentIds: [3],
+    type: "Individual",
+    date: "2024-06-18",
+    time: "08:30",
+    duration: 30,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Sound discrimination", "Sentence structure"],
+    status: "scheduled"
+  },
+  {
+    id: 11,
+    student: "Fluency Support Group",
+    studentIds: [2, 9, 4],
+    students: ["Jake Mitchell", "Ethan Cooper", "Marcus Thompson"],
+    type: "Group",
+    date: "2024-06-18",
+    time: "09:05",
+    duration: 30,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Fluency strategies", "Communication confidence", "Public speaking"],
+    status: "scheduled"
+  },
+  {
+    id: 12,
+    student: "Executive Function Group",
+    studentIds: [7, 9, 4, 1],
+    students: ["Aiden Brooks", "Ethan Cooper", "Marcus Thompson", "Emma Rodriguez"],
+    type: "Group",
+    date: "2024-06-18",
+    time: "09:40",
+    duration: 30,
+    location: "Room 104",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Working memory", "Problem solving", "Organization skills"],
+    status: "scheduled"
+  },
+  {
+    id: 13,
+    student: "Phonological Awareness Group",
+    studentIds: [11, 6, 3, 12],
+    students: ["Noah Williams", "David Kim", "Sophia Chen", "Zoe Anderson"],
+    type: "Group",
+    date: "2024-06-18",
+    time: "10:15",
+    duration: 30,
+    location: "Room 103",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Sound blending", "Segmentation", "Rhyming", "Syllable awareness"],
+    status: "scheduled"
+  },
+  {
+    id: 14,
+    student: "Lily Wang",
+    studentIds: [5],
+    type: "Individual",
+    date: "2024-06-18",
+    time: "10:50",
+    duration: 30,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Auditory processing", "Vocabulary development"],
+    status: "scheduled"
+  },
+  {
+    id: 15,
+    student: "Aiden Brooks",
+    studentIds: [7],
+    type: "Individual",
+    date: "2024-06-18",
+    time: "11:25",
+    duration: 30,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Working memory", "Narrative organization"],
+    status: "scheduled"
+  },
+
+  // Wednesday Sessions
+  {
+    id: 16,
+    student: "Emma Rodriguez",
+    studentIds: [1],
+    type: "Individual",
+    date: "2024-06-19",
+    time: "08:35",
+    duration: 30,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Improve /r/ sound production"],
+    status: "scheduled"
+  },
+  {
+    id: 17,
+    student: "Articulation Group A",
+    studentIds: [3, 6, 11, 12],
+    students: ["Sophia Chen", "David Kim", "Noah Williams", "Zoe Anderson"],
+    type: "Group",
+    date: "2024-06-19",
+    time: "09:10",
+    duration: 30,
+    location: "Room 103",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Sound production practice", "Generalization activities"],
+    status: "scheduled"
+  },
+  {
+    id: 18,
+    student: "Isabella Martinez",
+    studentIds: [10],
+    type: "Individual",
+    date: "2024-06-19",
+    time: "10:20",
+    duration: 30,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Verbal participation", "Anxiety management"],
+    status: "scheduled"
+  },
+  {
+    id: 19,
+    student: "Ethan Cooper",
+    studentIds: [9],
+    type: "Individual",
+    date: "2024-06-19",
+    time: "11:30",
+    duration: 30,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Memory strategies", "Problem solving"],
+    status: "scheduled"
+  },
+
+  // Thursday Sessions
+  {
+    id: 20,
+    student: "Jake Mitchell",
+    studentIds: [2],
+    type: "Individual",
+    date: "2024-06-20",
+    time: "09:10",
+    duration: 30,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Fluency techniques"],
+    status: "scheduled"
+  },
+  {
+    id: 21,
+    student: "Maya Patel",
+    studentIds: [8],
+    type: "Individual",
+    date: "2024-06-20",
+    time: "10:20",
+    duration: 15,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Vocabulary expansion", "Two-word combinations"],
+    status: "scheduled"
+  },
+
+  // Friday Sessions
+  {
+    id: 22,
+    student: "Sophia Chen",
+    studentIds: [3],
+    type: "Individual",
+    date: "2024-06-21",
+    time: "08:35",
+    duration: 15,
+    location: "Room 101",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Sound discrimination"],
+    status: "scheduled"
+  },
+  {
+    id: 23,
+    student: "Lily Wang",
+    studentIds: [5],
+    type: "Individual",
+    date: "2024-06-21",
+    time: "10:05",
+    duration: 15,
+    location: "Room 102",
+    therapist: "Dr. Sarah Johnson",
+    goals: ["Auditory processing"],
+    status: "scheduled"
   }
-  // More sessions would go here...
 ];
 
 const getStatusColor = (status) => {
