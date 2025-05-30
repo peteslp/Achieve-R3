@@ -992,8 +992,272 @@ const SessionModal = ({ session, isOpen, onClose, onSave, onDelete }) => {
   );
 };
 
-// Main Schedule Component
-const Schedule = () => {
+// Live Scheduler Component with Drag & Drop
+const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
+  const [draggedStudent, setDraggedStudent] = useState(null);
+  const [draggedSession, setDraggedSession] = useState(null);
+  const [dropZone, setDropZone] = useState(null);
+
+  const weekStart = new Date(currentDate);
+  weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+  
+  const weekDays = [];
+  for (let i = 1; i < 6; i++) { // Monday to Friday only
+    const day = new Date(weekStart);
+    day.setDate(weekStart.getDate() + i);
+    weekDays.push(day);
+  }
+
+  // Get sessions for specific day
+  const getSessionsForDay = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return sessions.filter(session => session.date === dateStr);
+  };
+
+  // Get session at specific time slot
+  const getSessionAtTimeSlot = (date, time) => {
+    const daySessions = getSessionsForDay(date);
+    return daySessions.find(session => session.time === time);
+  };
+
+  // Check if time slot is occupied by a session
+  const isTimeSlotOccupied = (date, time, duration = 15) => {
+    const daySessions = getSessionsForDay(date);
+    const slotStart = timeSlots.indexOf(time);
+    const slotsNeeded = duration / 5;
+    
+    for (let i = 0; i < slotsNeeded; i++) {
+      const checkTime = timeSlots[slotStart + i];
+      if (daySessions.some(session => session.time === checkTime)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Handle drag start for students
+  const handleStudentDragStart = (student) => {
+    setDraggedStudent(student);
+  };
+
+  // Handle drag start for existing sessions
+  const handleSessionDragStart = (session) => {
+    setDraggedSession(session);
+  };
+
+  // Handle drop
+  const handleDrop = (date, time) => {
+    const dateStr = date.toISOString().split('T')[0];
+    
+    if (draggedStudent) {
+      // Create new session for student
+      const newSession = {
+        id: Math.max(...sessions.map(s => s.id)) + 1,
+        student: draggedStudent.name,
+        studentIds: [draggedStudent.id],
+        type: "Individual",
+        date: dateStr,
+        time: time,
+        duration: 30,
+        location: "Room 101",
+        therapist: "Dr. Sarah Johnson",
+        goals: ["Individual therapy session"],
+        status: "scheduled"
+      };
+      onSessionUpdate([...sessions, newSession]);
+    } else if (draggedSession) {
+      // Move existing session
+      const updatedSessions = sessions.map(session => 
+        session.id === draggedSession.id 
+          ? { ...session, date: dateStr, time: time }
+          : session
+      );
+      onSessionUpdate(updatedSessions);
+    }
+    
+    setDraggedStudent(null);
+    setDraggedSession(null);
+    setDropZone(null);
+  };
+
+  // Handle drag over
+  const handleDragOver = (e, date, time) => {
+    e.preventDefault();
+    setDropZone({ date: date.toISOString().split('T')[0], time });
+  };
+
+  // Handle drag leave
+  const handleDragLeave = () => {
+    setDropZone(null);
+  };
+
+  // Get available students (not in group sessions at this time)
+  const getAvailableStudents = (date, time) => {
+    const session = getSessionAtTimeSlot(date, time);
+    if (!session) return students;
+    
+    const occupiedStudentIds = session.studentIds || [];
+    return students.filter(student => !occupiedStudentIds.includes(student.id));
+  };
+
+  // Render time slots (every 30 minutes for cleaner view)
+  const displayTimeSlots = timeSlots.filter((_, index) => index % 6 === 0 || index % 6 === 6); // Every 30 minutes
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="p-4 border-b border-slate-200">
+        <h3 className="text-lg font-semibold text-slate-800 mb-2">Live Scheduler - Drag & Drop</h3>
+        <p className="text-sm text-slate-600">Drag students or sessions to time slots to schedule therapy</p>
+      </div>
+
+      <div className="flex">
+        {/* Students Sidebar */}
+        <div className="w-64 border-r border-slate-200 p-4">
+          <h4 className="font-medium text-slate-700 mb-3">Available Students</h4>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {students.map(student => (
+              <div
+                key={student.id}
+                draggable
+                onDragStart={() => handleStudentDragStart(student)}
+                className={`flex items-center space-x-2 p-2 rounded-lg border-2 border-dashed border-slate-200 cursor-move hover:border-slate-300 hover:bg-slate-50 transition-colors ${
+                  draggedStudent?.id === student.id ? 'border-blue-400 bg-blue-50' : ''
+                }`}
+              >
+                <div className={`w-3 h-3 rounded-full ${getStudentColor(student.color)}`}></div>
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-slate-700">{student.name}</span>
+                  <div className="text-xs text-slate-500">{student.age}y, {student.grade}</div>
+                </div>
+                <Target className="w-4 h-4 text-slate-400" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Schedule Grid */}
+        <div className="flex-1 overflow-x-auto">
+          <div className="grid grid-cols-6 min-w-full">
+            {/* Header */}
+            <div className="p-3 bg-slate-50 font-medium text-slate-700 text-sm border-b border-slate-200">
+              Time
+            </div>
+            {weekDays.map((day, index) => (
+              <div key={index} className="p-3 text-center border-b border-l border-slate-200 bg-slate-50">
+                <div className="font-medium text-slate-800 text-sm">
+                  {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                </div>
+                <div className="text-sm text-slate-600">{day.getDate()}</div>
+                <div className="text-xs text-slate-500 mt-1">
+                  {getSessionsForDay(day).length} sessions
+                </div>
+              </div>
+            ))}
+
+            {/* Time slots and schedule */}
+            {displayTimeSlots.map((time, timeIndex) => (
+              <React.Fragment key={timeIndex}>
+                {/* Time label */}
+                <div className="p-3 bg-slate-50 text-xs text-slate-600 border-b border-slate-200 flex items-center">
+                  {time}
+                </div>
+                
+                {/* Day columns */}
+                {weekDays.map((day, dayIndex) => {
+                  const session = getSessionAtTimeSlot(day, time);
+                  const isDropZoneActive = dropZone?.date === day.toISOString().split('T')[0] && dropZone?.time === time;
+                  const canDrop = !isTimeSlotOccupied(day, time, draggedStudent ? 30 : (draggedSession?.duration || 30));
+                  
+                  return (
+                    <div
+                      key={dayIndex}
+                      className={`relative border-b border-l border-slate-200 min-h-16 p-1 ${
+                        isDropZoneActive && canDrop ? 'bg-green-100 border-green-300' : ''
+                      } ${
+                        isDropZoneActive && !canDrop ? 'bg-red-100 border-red-300' : ''
+                      } ${
+                        !session && canDrop ? 'hover:bg-slate-50' : ''
+                      }`}
+                      onDragOver={(e) => canDrop && handleDragOver(e, day, time)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={() => canDrop && handleDrop(day, time)}
+                    >
+                      {session ? (
+                        <div
+                          draggable
+                          onDragStart={() => handleSessionDragStart(session)}
+                          className="bg-white border border-slate-200 rounded p-2 shadow-sm hover:shadow-md transition-all cursor-move"
+                        >
+                          <div className="flex items-center space-x-1 mb-1">
+                            {session.type === 'Group' ? (
+                              <div className="flex -space-x-1">
+                                {session.studentIds?.slice(0, 3).map((id, index) => {
+                                  const student = students.find(s => s.id === id);
+                                  return (
+                                    <div 
+                                      key={index} 
+                                      className={`w-2 h-2 rounded-full border border-white ${
+                                        student ? getStudentColor(student.color) : 'bg-slate-400'
+                                      }`}
+                                    ></div>
+                                  );
+                                })}
+                                {session.studentIds?.length > 3 && (
+                                  <div className="w-2 h-2 rounded-full bg-slate-300 border border-white"></div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className={`w-2 h-2 rounded-full ${
+                                session.studentIds?.[0] ? 
+                                  getStudentColor(students.find(s => s.id === session.studentIds[0])?.color) : 
+                                  'bg-slate-400'
+                              }`}></div>
+                            )}
+                            {session.type === 'Group' ? <Users className="w-3 h-3 text-purple-600" /> : <User className="w-3 h-3 text-blue-600" />}
+                          </div>
+                          <div className="text-xs font-medium text-slate-800 truncate">{session.student}</div>
+                          <div className="text-xs text-slate-600">{session.duration}min</div>
+                        </div>
+                      ) : (
+                        canDrop && (draggedStudent || draggedSession) && (
+                          <div className="h-full flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-300 rounded">
+                            <div className="text-center">
+                              <Plus className="w-4 h-4 mx-auto mb-1" />
+                              <div className="text-xs">Drop Here</div>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+              <span className="text-slate-600">Available Drop Zone</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+              <span className="text-slate-600">Conflict - Cannot Drop</span>
+            </div>
+          </div>
+          <div className="text-slate-500">
+            💡 Tip: Drag students from the left panel or existing sessions to reschedule
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
   const [currentDate, setCurrentDate] = useState(new Date());
   const [sessions, setSessions] = useState(mockSessions);
   const [selectedSession, setSelectedSession] = useState(null);
