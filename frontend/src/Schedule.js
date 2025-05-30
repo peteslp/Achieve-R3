@@ -409,10 +409,14 @@ const mockSessions = [
   }
 ];
 
-const timeSlots = [
-  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30"
-];
+// 5-minute increment time slots
+const timeSlots = [];
+for (let hour = 8; hour <= 15; hour++) {
+  for (let minute = 0; minute < 60; minute += 5) {
+    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    timeSlots.push(timeString);
+  }
+}
 
 const getStatusColor = (status) => {
   switch(status) {
