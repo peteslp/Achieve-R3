@@ -602,19 +602,330 @@ const LiveScheduler = ({ currentDate, sessions, onSessionUpdate }) => {
   );
 };
 
-// Simple view components (for brevity, these would be more detailed)
-const DailyView = () => <div className="p-6 text-center">Daily View - Coming Soon</div>;
-const WeeklyView = () => <div className="p-6 text-center">Weekly View - Coming Soon</div>;
-const MonthlyView = () => <div className="p-6 text-center">Monthly View - Coming Soon</div>;
+// Session Modal Component - COMPLETE
+const SessionModal = ({ session, isOpen, onClose, onSave, onDelete }) => {
+  const [formData, setFormData] = useState(session || {
+    student: '',
+    type: 'Individual',
+    date: '',
+    time: '',
+    duration: 30,
+    location: 'Room 101',
+    goals: [],
+    status: 'scheduled',
+    studentIds: [],
+    students: []
+  });
 
-// Main Schedule Component
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+    onClose();
+  };
+
+  const handleStudentChange = (studentId, checked) => {
+    if (formData.type === 'Individual') {
+      setFormData({
+        ...formData,
+        studentIds: checked ? [parseInt(studentId)] : [],
+        student: checked ? students.find(s => s.id === parseInt(studentId))?.name : ''
+      });
+    } else {
+      const currentIds = formData.studentIds || [];
+      const newIds = checked 
+        ? [...currentIds, parseInt(studentId)]
+        : currentIds.filter(id => id !== parseInt(studentId));
+      
+      const selectedStudents = students.filter(s => newIds.includes(s.id)).map(s => s.name);
+      
+      setFormData({
+        ...formData,
+        studentIds: newIds,
+        students: selectedStudents,
+        student: newIds.length > 0 ? `Group Session (${newIds.length} students)` : ''
+      });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800">
+            {session ? 'Edit Session' : 'New Session'}
+          </h2>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Session Type</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value, studentIds: [], students: [], student: ''})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="Individual">Individual</option>
+                <option value="Group">Group</option>
+                <option value="Assessment">Assessment</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Duration</label>
+              <select
+                value={formData.duration}
+                onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value)})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+                <option value={45}>45 minutes</option>
+                <option value={60}>60 minutes</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Date</label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Time (5-minute precision)</label>
+              <select
+                value={formData.time}
+                onChange={(e) => setFormData({...formData, time: e.target.value})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select Time</option>
+                {timeSlots.map(time => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
+              <select
+                value={formData.location}
+                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="Room 101">Room 101</option>
+                <option value="Room 102">Room 102</option>
+                <option value="Room 103">Room 103</option>
+                <option value="Room 104">Room 104</option>
+                <option value="Main Therapy Room">Main Therapy Room</option>
+                <option value="Quiet Room">Quiet Room</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          
+          {/* Student Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3">
+              {formData.type === 'Individual' ? 'Select Student' : 'Select Students (3-5 recommended for groups)'}
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-48 overflow-y-auto p-3 border border-slate-200 rounded-lg">
+              {students.map(student => (
+                <label key={student.id} className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type={formData.type === 'Individual' ? 'radio' : 'checkbox'}
+                    name="students"
+                    value={student.id}
+                    checked={formData.studentIds?.includes(student.id) || false}
+                    onChange={(e) => handleStudentChange(student.id, e.target.checked)}
+                    className="text-slate-600"
+                  />
+                  <div className={`w-3 h-3 rounded-full ${getStudentColor(student.color)}`}></div>
+                  <span className="text-sm text-slate-700">{student.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-between pt-4">
+            <div className="space-x-2">
+              {session && (
+                <button
+                  type="button"
+                  onClick={() => onDelete(session)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+            <div className="space-x-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                {session ? 'Update' : 'Create'} Session
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Main Schedule Component - COMPLETE WITH ALL FUNCTIONALITY
 const Schedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [sessions, setSessions] = useState(mockSessions);
-  const [view, setView] = useState('live'); // daily, weekly, monthly, live
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [view, setView] = useState('weekly'); // daily, weekly, monthly, live
+
+  const handlePrevPeriod = () => {
+    const newDate = new Date(currentDate);
+    if (view === 'daily') {
+      newDate.setDate(currentDate.getDate() - 1);
+    } else if (view === 'weekly' || view === 'live') {
+      newDate.setDate(currentDate.getDate() - 7);
+    } else if (view === 'monthly') {
+      newDate.setMonth(currentDate.getMonth() - 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const handleNextPeriod = () => {
+    const newDate = new Date(currentDate);
+    if (view === 'daily') {
+      newDate.setDate(currentDate.getDate() + 1);
+    } else if (view === 'weekly' || view === 'live') {
+      newDate.setDate(currentDate.getDate() + 7);
+    } else if (view === 'monthly') {
+      newDate.setMonth(currentDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const handleSessionClick = (session) => {
+    setSelectedSession(session);
+    setIsModalOpen(true);
+  };
+
+  const handleAddSession = (date, time) => {
+    setSelectedSession({
+      date: date.toISOString().split('T')[0],
+      time: time,
+      student: '',
+      type: 'Individual',
+      duration: 30,
+      location: 'Room 101',
+      status: 'scheduled',
+      studentIds: [],
+      students: []
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDayClick = (date) => {
+    setCurrentDate(date);
+    setView('daily');
+  };
+
+  const handleSaveSession = (sessionData) => {
+    if (selectedSession?.id) {
+      setSessions(sessions.map(s => 
+        s.id === selectedSession.id 
+          ? {...sessionData, id: selectedSession.id, therapist: "Dr. Sarah Johnson"} 
+          : s
+      ));
+    } else {
+      const newSession = {
+        ...sessionData,
+        id: Math.max(...sessions.map(s => s.id)) + 1,
+        therapist: "Dr. Sarah Johnson"
+      };
+      setSessions([...sessions, newSession]);
+    }
+  };
+
+  const handleDeleteSession = (session) => {
+    setSessions(sessions.filter(s => s.id !== session.id));
+    setIsModalOpen(false);
+    setSelectedSession(null);
+  };
 
   const handleSessionUpdate = (updatedSessions) => {
     setSessions(updatedSessions);
+  };
+
+  const getCurrentPeriodDisplay = () => {
+    if (view === 'daily') {
+      return currentDate.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    } else if (view === 'weekly' || view === 'live') {
+      const weekStart = new Date(currentDate);
+      weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    } else {
+      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+  };
+
+  const getSessionCount = () => {
+    if (view === 'daily') {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      return sessions.filter(s => s.date === dateStr).length;
+    } else if (view === 'weekly' || view === 'live') {
+      const weekStart = new Date(currentDate);
+      weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      return sessions.filter(s => {
+        const sessionDate = new Date(s.date);
+        return sessionDate >= weekStart && sessionDate <= weekEnd;
+      }).length;
+    } else {
+      const month = currentDate.getMonth();
+      const year = currentDate.getFullYear();
+      return sessions.filter(s => {
+        const sessionDate = new Date(s.date);
+        return sessionDate.getMonth() === month && sessionDate.getFullYear() === year;
+      }).length;
+    }
   };
 
   return (
@@ -624,57 +935,117 @@ const Schedule = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-800 mb-2">Schedule</h1>
-            <p className="text-slate-600">Manage therapy sessions with 5-minute precision</p>
+            <p className="text-slate-600">Manage therapy sessions with 5-minute precision scheduling</p>
           </div>
+          <button
+            onClick={() => handleAddSession(new Date(), '09:00')}
+            className="flex items-center space-x-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Session</span>
+          </button>
         </div>
         
-        {/* View Toggle */}
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center bg-slate-100 rounded-lg p-1">
+        {/* Controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
             <button
-              onClick={() => setView('daily')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
-                view === 'daily' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
-              }`}
+              onClick={handlePrevPeriod}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <List className="w-4 h-4" />
-              <span>Day</span>
+              <ChevronLeft className="w-5 h-5 text-slate-600" />
             </button>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-slate-800">{getCurrentPeriodDisplay()}</h2>
+              <p className="text-sm text-slate-600">{getSessionCount()} sessions</p>
+            </div>
             <button
-              onClick={() => setView('weekly')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
-                view === 'weekly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
-              }`}
+              onClick={handleNextPeriod}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <Grid className="w-4 h-4" />
-              <span>Week</span>
+              <ChevronRight className="w-5 h-5 text-slate-600" />
             </button>
+          </div>
+          
+          <div className="flex items-center space-x-2">
             <button
-              onClick={() => setView('monthly')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
-                view === 'monthly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
-              }`}
+              onClick={() => setCurrentDate(new Date())}
+              className="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
             >
-              <CalendarDays className="w-4 h-4" />
-              <span>Month</span>
+              Today
             </button>
-            <button
-              onClick={() => setView('live')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
-                view === 'live' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
-              }`}
-            >
-              <Target className="w-4 h-4" />
-              <span>Live Scheduler</span>
-            </button>
+            
+            {/* View Toggle */}
+            <div className="flex items-center bg-slate-100 rounded-lg p-1">
+              <button
+                onClick={() => setView('daily')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  view === 'daily' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                <span>Day</span>
+              </button>
+              <button
+                onClick={() => setView('weekly')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  view === 'weekly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <Grid className="w-4 h-4" />
+                <span>Week</span>
+              </button>
+              <button
+                onClick={() => setView('monthly')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  view === 'monthly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <CalendarDays className="w-4 h-4" />
+                <span>Month</span>
+              </button>
+              <button
+                onClick={() => setView('live')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  view === 'live' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <Target className="w-4 h-4" />
+                <span>Live</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Schedule Views */}
-      {view === 'daily' && <DailyView />}
-      {view === 'weekly' && <WeeklyView />}
-      {view === 'monthly' && <MonthlyView />}
+      {view === 'daily' && (
+        <DailyView 
+          currentDate={currentDate}
+          sessions={sessions}
+          onSessionClick={handleSessionClick}
+          onAddSession={handleAddSession}
+        />
+      )}
+
+      {view === 'weekly' && (
+        <WeeklyView 
+          currentDate={currentDate}
+          sessions={sessions}
+          onSessionClick={handleSessionClick}
+          onAddSession={handleAddSession}
+        />
+      )}
+
+      {view === 'monthly' && (
+        <MonthlyView 
+          currentDate={currentDate}
+          sessions={sessions}
+          onSessionClick={handleSessionClick}
+          onDayClick={handleDayClick}
+        />
+      )}
+
       {view === 'live' && (
         <LiveScheduler 
           currentDate={currentDate}
@@ -711,13 +1082,27 @@ const Schedule = () => {
               <Clock className="w-4 h-4 text-emerald-600" />
               <span className="text-sm text-slate-700">5-minute precision scheduling</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Target className="w-4 h-4 text-amber-600" />
-              <span className="text-sm text-slate-700">Drag & drop scheduling</span>
-            </div>
+            {view === 'live' && (
+              <div className="flex items-center space-x-2">
+                <Target className="w-4 h-4 text-amber-600" />
+                <span className="text-sm text-slate-700">Drag & drop scheduling</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Session Modal */}
+      <SessionModal
+        session={selectedSession}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedSession(null);
+        }}
+        onSave={handleSaveSession}
+        onDelete={handleDeleteSession}
+      />
     </div>
   );
 };
