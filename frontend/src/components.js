@@ -987,10 +987,19 @@ export const Schedule = ({ currentUser, onLogout }) => {
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Schedule</h1>
             <p className="text-slate-600">Manage your therapy sessions</p>
           </div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
-            <Plus className="h-4 w-4" />
-            <span>New Session</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/schedule-grid')}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-purple-700"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Grid View</span>
+            </button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
+              <Plus className="h-4 w-4" />
+              <span>New Session</span>
+            </button>
+          </div>
         </div>
 
         {/* Schedule Controls */}
